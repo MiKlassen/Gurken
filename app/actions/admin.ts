@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/data";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { BookingStatus } from "@/lib/types";
 
@@ -83,12 +84,24 @@ export async function updateBookingStatusAction(formData: FormData) {
 }
 
 export async function addAdminAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const email = text(formData, "email").toLowerCase();
   if (!email) redirect("/admin?error=Bitte E-Mail für neuen Admin angeben.");
 
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("grant_admin_by_email", { target_email: email });
+  const adminClient = createAdminClient();
+  const { data, error: listError } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (listError) redirect(`/admin?error=${encodeURIComponent(listError.message)}`);
+
+  const target = data.users.find((candidate) => candidate.email?.toLowerCase() === email);
+  if (!target) redirect(`/admin?error=${encodeURIComponent(`Kein Benutzer für ${email} gefunden.`)}`);
+
+  const { error } = await adminClient.from("admin_memberships").upsert(
+    {
+      user_id: target.id,
+      granted_by: user.id
+    },
+    { onConflict: "user_id" }
+  );
 
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
   redirect("/admin?message=Admin hinzugefügt.");

@@ -71,6 +71,7 @@ create unique index bookings_one_open_per_user_idx
 
 create index bookings_event_status_idx on public.bookings (event_id, status);
 create index bookings_user_idx on public.bookings (user_id);
+create index admin_memberships_granted_by_idx on public.admin_memberships (granted_by);
 
 create table public.gallery_photos (
   id uuid primary key default gen_random_uuid(),
@@ -83,10 +84,12 @@ create table public.gallery_photos (
 );
 
 create index gallery_event_created_idx on public.gallery_photos (event_id, created_at desc);
+create index gallery_photos_user_id_idx on public.gallery_photos (user_id);
 
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -118,37 +121,6 @@ as $$
     from public.admin_memberships
     where user_id = check_user_id
   );
-$$;
-
-create or replace function public.grant_admin_by_email(target_email text)
-returns uuid
-language plpgsql
-security definer
-set search_path = public, auth
-as $$
-declare
-  target_user_id uuid;
-begin
-  if auth.uid() is null or not public.is_admin(auth.uid()) then
-    raise exception 'Only admins can grant admin access';
-  end if;
-
-  select id
-    into target_user_id
-  from auth.users
-  where lower(email) = lower(target_email)
-  limit 1;
-
-  if target_user_id is null then
-    raise exception 'No user found for email %', target_email;
-  end if;
-
-  insert into public.admin_memberships (user_id, granted_by)
-  values (target_user_id, auth.uid())
-  on conflict (user_id) do nothing;
-
-  return target_user_id;
-end;
 $$;
 
 create or replace function public.upsert_booking(
@@ -384,5 +356,4 @@ to authenticated
 using (bucket_id = 'gallery' and public.is_admin());
 
 grant execute on function public.is_admin(uuid) to authenticated;
-grant execute on function public.grant_admin_by_email(text) to authenticated;
 grant execute on function public.upsert_booking(uuid, public.booking_mode, date, date, date[], text) to authenticated;
