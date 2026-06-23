@@ -1,0 +1,11 @@
+[b]Dorf:[/b] [coord]460|514[/coord]
+[b]Wallstufe:[/b] 5
+[b]Zustimmung:[/b] 100
+
+[b]Verteidiger:[/b]  82  5  19  24  6  0  0  0  0 
+
+    [command]attack_small[/command] [command]spy[/command] NBKiwi: HansaKiwi [coord]472|537[/coord] --> Ankunftszeit: 28.10.25 00:39:29 [player]NBKiwi[/player]
+	
+
+
+
