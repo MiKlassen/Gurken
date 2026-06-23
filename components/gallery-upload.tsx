@@ -13,7 +13,7 @@ export function GalleryUpload() {
         Caption optional
         <input name="caption" maxLength={140} placeholder="Was passiert hier gerade?" />
       </label>
-      <SubmitButton pendingLabel="Laedt hoch...">
+      <SubmitButton pendingLabel="Lädt hoch...">
         <UploadCloud size={18} /> Hochladen
       </SubmitButton>
     </form>

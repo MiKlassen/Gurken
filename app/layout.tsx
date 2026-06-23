@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Gurken Treffen",
-  description: "Internes Buchungssystem fuer das Stimme-Staemme-Treffen.",
+  description: "Internes Buchungssystem für das Stimme-Stämme-Treffen.",
   icons: {
     icon: "/assets/chungus.png"
   }

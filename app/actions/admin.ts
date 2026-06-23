@@ -47,7 +47,7 @@ export async function saveEventAction(formData: FormData) {
   };
 
   if (!payload.year || !payload.name || !payload.slug || !payload.starts_on || !payload.ends_on || !payload.member_limit) {
-    redirect("/admin?error=Bitte alle Pflichtfelder fuer das Treffen ausfuellen.");
+    redirect("/admin?error=Bitte alle Pflichtfelder für das Treffen ausfüllen.");
   }
 
   const query = eventId
@@ -69,7 +69,7 @@ export async function updateBookingStatusAction(formData: FormData) {
   const status = text(formData, "status") as BookingStatus;
 
   if (!bookingId || !["pending_payment", "paid", "waitlisted", "cancelled"].includes(status)) {
-    redirect("/admin?error=Ungueltiger Buchungsstatus.");
+    redirect("/admin?error=Ungültiger Buchungsstatus.");
   }
 
   const supabase = await createClient();
@@ -85,11 +85,11 @@ export async function updateBookingStatusAction(formData: FormData) {
 export async function addAdminAction(formData: FormData) {
   await requireAdmin();
   const email = text(formData, "email").toLowerCase();
-  if (!email) redirect("/admin?error=Bitte E-Mail fuer neuen Admin angeben.");
+  if (!email) redirect("/admin?error=Bitte E-Mail für neuen Admin angeben.");
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("grant_admin_by_email", { target_email: email });
 
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
-  redirect("/admin?message=Admin hinzugefuegt.");
+  redirect("/admin?message=Admin hinzugefügt.");
 }

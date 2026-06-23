@@ -25,7 +25,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
         </div>
       </section>
       {error ? <p className="notice error">{error}</p> : null}
-      {isProfileComplete(profile) ? <p className="notice success">Dein Profil ist vollstaendig.</p> : null}
+      {isProfileComplete(profile) ? <p className="notice success">Dein Profil ist vollständig.</p> : null}
       <form className="form-panel wide" action={saveProfileAction}>
         <div className="form-grid three">
           <label>

@@ -93,7 +93,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           <CalendarDays size={18} /> Buchung bearbeiten
         </Link>
         <Link className="button secondary" href="/gallery">
-          <Images size={18} /> Galerie oeffnen
+          <Images size={18} /> Galerie öffnen
         </Link>
       </section>
     </main>

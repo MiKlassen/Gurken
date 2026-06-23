@@ -13,9 +13,9 @@ export default async function VerifyPage({ searchParams }: { searchParams: Searc
       <BrandHeader />
       <section className="auth-card">
         <MailCheck size={40} />
-        <h1>Mail bestaetigen</h1>
+        <h1>Mail bestätigen</h1>
         <p>
-          {email ? `Wir haben ${email} eine Bestaetigung geschickt.` : "Bitte bestaetige deine Mailadresse."} Danach
+          {email ? `Wir haben ${email} eine Bestätigung geschickt.` : "Bitte bestätige deine Mailadresse."} Danach
           geht es mit dem Onboarding weiter.
         </p>
         <Link className="button primary" href="/auth/login">

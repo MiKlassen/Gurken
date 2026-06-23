@@ -34,7 +34,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           <SubmitButton>Einloggen</SubmitButton>
         </form>
         <form className="inline-reset" action={resetPasswordAction}>
-          <input type="email" name="email" placeholder="Mail fuer Reset" aria-label="E-Mail fuer Passwort-Reset" />
+          <input type="email" name="email" placeholder="Mail für Reset" aria-label="E-Mail für Passwort-Reset" />
           <SubmitButton className="button secondary small" pendingLabel="Sendet...">
             Reset-Mail
           </SubmitButton>

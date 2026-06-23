@@ -24,7 +24,7 @@ export async function uploadGalleryPhotoAction(formData: FormData) {
   const caption = formData.get("caption");
 
   if (!(file instanceof File) || file.size === 0) {
-    redirect("/gallery?error=Bitte ein Foto auswaehlen.");
+    redirect("/gallery?error=Bitte ein Foto auswählen.");
   }
 
   if (!file.type.startsWith("image/")) {
@@ -32,7 +32,7 @@ export async function uploadGalleryPhotoAction(formData: FormData) {
   }
 
   if (file.size > 10 * 1024 * 1024) {
-    redirect("/gallery?error=Fotos duerfen maximal 10 MB gross sein.");
+    redirect("/gallery?error=Fotos dürfen maximal 10 MB groß sein.");
   }
 
   const supabase = await createClient();

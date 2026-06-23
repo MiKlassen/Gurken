@@ -22,7 +22,7 @@ export default async function BookPage({ searchParams }: { searchParams: SearchP
         <CalendarDays size={34} />
         <div>
           <h1>Buchung</h1>
-          <p>Zeitraum oder Tagesgast waehlen, Betrag sehen, absenden und danach offline bezahlen.</p>
+          <p>Zeitraum oder Tagesgast wählen, Betrag sehen, absenden und danach offline bezahlen.</p>
         </div>
       </section>
       {error ? <p className="notice error">{error}</p> : null}

@@ -25,7 +25,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         <img src="/assets/bierkapitaen.png" alt="" />
         <div>
           <h1>Admin-Konsole</h1>
-          <p>Treffen planen, Buchungen pruefen, Zahlung markieren und Admins setzen.</p>
+          <p>Treffen planen, Buchungen prüfen, Zahlung markieren und Admins setzen.</p>
         </div>
       </section>
       {error ? <p className="notice error">{error}</p> : null}
@@ -105,8 +105,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           <h2>Admins</h2>
           <form className="inline-reset" action={addAdminAction}>
             <input name="email" type="email" placeholder="mail@example.com" required />
-            <SubmitButton className="button secondary small" pendingLabel="Fuegt hinzu...">
-              Hinzufuegen
+            <SubmitButton className="button secondary small" pendingLabel="Fügt hinzu...">
+              Hinzufügen
             </SubmitButton>
           </form>
           <h2>Mitglieder</h2>
@@ -138,7 +138,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                     <br />
                     <span>{booking.profiles?.hometown || "Wohnort offen"}</span>
                   </td>
-                  <td>{booking.mode === "overnight" ? "Uebernachtung" : "Tagesgast"}</td>
+                  <td>{booking.mode === "overnight" ? "Übernachtung" : "Tagesgast"}</td>
                   <td>
                     {booking.mode === "overnight"
                       ? `${formatDate(booking.arrival_date)} - ${formatDate(booking.departure_date)}`

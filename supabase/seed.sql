@@ -17,12 +17,12 @@ insert into public.events (
 )
 values (
   2026,
-  'Stimme-Staemme Treffen 2026',
+  'Stimme-Stämme Treffen 2026',
   'stimme-staemme-2026',
   true,
   '2026-08-14',
   '2026-08-17',
-  'Ein internes Gurken-Wochenende mit Stimmen, Staemmen, Kaltgetraenken und regionaler Bierkastenpflicht.',
+  'Ein internes Gurken-Wochenende mit Stimmen, Stämmen, Kaltgetränken und regionaler Bierkastenpflicht.',
   'Ort nach Login',
   'Hier den genauen Treffpunkt, Anreiseinfos, Schlafsituation und Hausregeln eintragen.',
   42,

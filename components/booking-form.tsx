@@ -24,7 +24,7 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
 
       <div className="segmented" aria-label="Buchungsart">
         <button className={mode === "overnight" ? "active" : ""} type="button" onClick={() => setMode("overnight")}>
-          <Moon size={18} /> Mit Uebernachtung
+          <Moon size={18} /> Mit Übernachtung
         </button>
         <button className={mode === "day_guest" ? "active" : ""} type="button" onClick={() => setMode("day_guest")}>
           <CalendarCheck size={18} /> Tagesgast
@@ -62,7 +62,7 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
         </div>
       ) : (
         <fieldset className="day-grid" disabled={locked}>
-          <legend>Tage auswaehlen</legend>
+          <legend>Tage auswählen</legend>
           {eventDays.map((day) => (
             <label key={day} className="check-tile">
               <input
@@ -103,7 +103,7 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
       </div>
 
       {locked ? (
-        <p className="notice success">Diese Buchung ist bezahlt und kann nur noch durch Admins geaendert werden.</p>
+        <p className="notice success">Diese Buchung ist bezahlt und kann nur noch durch Admins geändert werden.</p>
       ) : (
         <SubmitButton pendingLabel="Buchung wird gespeichert...">Buchung speichern</SubmitButton>
       )}

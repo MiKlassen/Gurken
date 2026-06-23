@@ -26,7 +26,7 @@ export async function submitBookingAction(formData: FormData) {
     .filter(Boolean);
 
   if (!eventId || !["overnight", "day_guest"].includes(mode)) {
-    redirect("/book?error=Die Buchung ist unvollstaendig.");
+    redirect("/book?error=Die Buchung ist unvollständig.");
   }
 
   const supabase = await createClient();

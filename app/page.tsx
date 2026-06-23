@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Beer, CalendarDays, Images, LockKeyhole, MapPin, ShieldCheck, Sprout } from "lucide-react";
+import { Beer, CalendarDays, Images, LockKeyhole, Sprout } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { getActiveEventPublic } from "@/lib/data";
@@ -15,7 +15,7 @@ export default async function HomePage() {
 
       <section className="hero-section">
         <div className="hero-copy">
-          <h1>Stimme-Staemme Treffen {event.year}</h1>
+          <h1>Stimme-Stämme Treffen {event.year}</h1>
           <p>{event.public_summary}</p>
           <div className="hero-actions">
             <Link className="button primary" href="/auth/register">
@@ -52,7 +52,7 @@ export default async function HomePage() {
         <article>
           <CalendarDays />
           <h2>Buchung mit Zeitraum</h2>
-          <p>Mit Uebernachtung pro Nacht oder als Tagesgast mit sofort sichtbarem Betrag.</p>
+          <p>Mit Übernachtung pro Nacht oder als Tagesgast mit sofort sichtbarem Betrag.</p>
         </article>
         <article>
           <Beer />
@@ -62,7 +62,7 @@ export default async function HomePage() {
         <article>
           <Images />
           <h2>Live-Galerie</h2>
-          <p>Fotos koennen vor Ort direkt hochgeladen und als Slideshow an den Beamer geworfen werden.</p>
+          <p>Fotos können vor Ort direkt hochgeladen und als Slideshow an den Beamer geworfen werden.</p>
         </article>
       </section>
 
@@ -70,19 +70,8 @@ export default async function HomePage() {
         <div>
           <h2>Was nach dem Login passiert</h2>
           <p>
-            Nach Mailverifizierung fuehrt dich das Onboarding durch Name, Vorname und Wohnort. Danach siehst du den
+            Nach Mailverifizierung führt dich das Onboarding durch Name, Vorname und Wohnort. Danach siehst du den
             genauen Ort, deine Zahlungsinfos und den Mitgliederbereich.
-          </p>
-        </div>
-        <div className="info-list">
-          <p>
-            <ShieldCheck size={18} /> E-Mail-Verifizierung und Turnstile schuetzen die Registrierung.
-          </p>
-          <p>
-            <MapPin size={18} /> Der genaue Treffpunkt ist erst im Mitgliederbereich sichtbar.
-          </p>
-          <p>
-            <Sprout size={18} /> Admins pflegen Preise, Limit, Warteliste und Zahlungsstatus.
           </p>
         </div>
       </section>

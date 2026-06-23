@@ -16,7 +16,7 @@ export async function saveProfileAction(formData: FormData) {
   const hometown = text(formData, "hometown");
 
   if (!firstName || !lastName || !hometown) {
-    redirect("/onboarding?error=Bitte Vorname, Name und Wohnort ausfuellen.");
+    redirect("/onboarding?error=Bitte Vorname, Name und Wohnort ausfüllen.");
   }
 
   const supabase = await createClient();
