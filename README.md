@@ -15,7 +15,7 @@ Internes Buchungssystem für das Stimme-Stämme-Treffen.
    ```bash
    pnpm install
    ```
-2. `.env.example` nach `.env.local` übernehmen und Werte setzen.
+2. `.env.example` nach `.env.local` übernehmen und Werte setzen. Als Supabase-Client-Key akzeptiert die App `NEXT_PUBLIC_SUPABASE_ANON_KEY` oder `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 3. In Supabase die Migration `supabase/migrations/001_initial.sql` ausführen.
 4. Optional `supabase/seed.sql` ausführen, um ein erstes aktives Treffen anzulegen.
 5. `INITIAL_ADMIN_EMAILS` setzen. Wenn sich eine dieser Adressen verifiziert einloggt und `SUPABASE_SERVICE_ROLE_KEY` gesetzt ist, wird sie automatisch Admin.
