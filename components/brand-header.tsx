@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Beer, CalendarDays, FileText, Images, MapPin, ShieldCheck, Sprout } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
@@ -11,7 +12,7 @@ export function BrandHeader({ isAuthed = false, isAdmin = false }: BrandHeaderPr
   return (
     <header className="site-header">
       <Link className="brand" href="/">
-        <img src="/assets/chungus.png" alt="" />
+        <Image src="/assets/chungus.png" alt="" width={38} height={38} />
         <span>Gurken Treffen</span>
       </Link>
       <nav className="nav-links" aria-label="Hauptnavigation">

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Beer, CalendarDays, Images, LockKeyhole, Sprout } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
@@ -43,8 +44,8 @@ export default async function HomePage() {
           </dl>
         </div>
         <div className="hero-art" aria-hidden="true">
-          <img className="hero-wappen" src="/assets/stammeswappen.png" alt="" />
-          <img className="hero-chungus" src="/assets/chungus.png" alt="" />
+          <Image className="hero-wappen" src="/assets/stammeswappen.png" alt="" fill priority sizes="(max-width: 900px) 100vw, 42vw" />
+          <Image className="hero-chungus" src="/assets/chungus.png" alt="" width={190} height={190} priority />
         </div>
       </section>
 

@@ -850,10 +850,12 @@ td span {
   overflow: hidden;
 }
 
-.photo-grid img {
-  display: block;
-  width: 100%;
+.photo-frame {
+  position: relative;
   aspect-ratio: 4 / 3;
+}
+
+.photo-frame img {
   object-fit: cover;
 }
 
@@ -885,11 +887,17 @@ td span {
   padding: 20px;
 }
 
-.slideshow-stage img {
-  max-height: calc(100vh - 150px);
-  width: auto;
+.slideshow-frame {
+  position: relative;
+  width: min(100%, 1400px);
+  height: calc(100vh - 150px);
   border-radius: var(--radius);
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.slideshow-frame img {
+  object-fit: contain;
 }
 
 .slideshow-stage p {

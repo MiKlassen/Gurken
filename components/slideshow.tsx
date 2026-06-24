@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type Slide = {
@@ -27,7 +28,9 @@ export function Slideshow({ photos }: { photos: Slide[] }) {
 
   return (
     <div className="slideshow-stage">
-      <img src={photo.signedUrl} alt={photo.caption || "Galeriefoto"} />
+      <div className="slideshow-frame">
+        <Image src={photo.signedUrl} alt={photo.caption || "Galeriefoto"} fill sizes="100vw" unoptimized priority />
+      </div>
       {photo.caption ? <p>{photo.caption}</p> : null}
     </div>
   );

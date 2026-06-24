@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Images } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
@@ -35,7 +36,15 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
       <section className="photo-grid">
         {photos.map((photo) => (
           <figure key={photo.id}>
-            <img src={photo.signedUrl} alt={photo.caption || "Galeriefoto"} loading="lazy" />
+            <div className="photo-frame">
+              <Image
+                src={photo.signedUrl}
+                alt={photo.caption || "Galeriefoto"}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw"
+                unoptimized
+              />
+            </div>
             {photo.caption ? <figcaption>{photo.caption}</figcaption> : null}
           </figure>
         ))}

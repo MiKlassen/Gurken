@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   addAdminAction,
   confirmBookingAction,
@@ -67,7 +68,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
     <main className="app-shell admin-shell">
       <BrandHeader isAuthed isAdmin />
       <section className="page-heading">
-        <img src="/assets/bierkapitaen.png" alt="" />
+        <Image src="/assets/bierkapitaen.png" alt="" width={76} height={76} />
         <div>
           <h1>Admin-Konsole</h1>
           <p>Treffen planen, Buchungen prüfen, Zahlung markieren und Admins setzen.</p>

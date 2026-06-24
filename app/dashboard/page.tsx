@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Beer, CalendarDays, Euro, Images, MapPin } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
@@ -38,7 +39,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           <h1>{event?.subject || event?.name || "Kein aktives Treffen"}</h1>
           <p>{event?.public_summary}</p>
         </div>
-        <img src="/assets/gurken-rudel.png" alt="" />
+        <Image src="/assets/gurken-rudel.png" alt="" width={360} height={260} priority />
       </section>
 
       {event ? (
