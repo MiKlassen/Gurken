@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveAppSettings, type AppSettings } from "@/lib/app-settings";
 import { requireAdmin } from "@/lib/data";
+import { saveEmailTemplates } from "@/lib/email-templates";
 import {
   decryptBookingFields,
   decryptGalleryPhoto,
@@ -14,7 +15,7 @@ import {
 } from "@/lib/personal-data";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { BookingRecord, BookingStatus, GalleryPhoto, ProfileRecord } from "@/lib/types";
+import type { BookingRecord, BookingStatus, EmailTemplateKey, GalleryPhoto, ProfileRecord } from "@/lib/types";
 
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -64,6 +65,11 @@ function optionalUrl(formData: FormData, key: string) {
     return "";
   }
 }
+
+const emailTemplateNames: Record<EmailTemplateKey, string> = {
+  booking_confirmation: "Buchungsbestätigung",
+  payment_reminder: "Zahlungsreminder"
+};
 
 export async function saveEventAction(formData: FormData) {
   await requireAdmin();
@@ -163,6 +169,30 @@ export async function saveAppSettingsAction(formData: FormData) {
 
   revalidatePath("/admin");
   redirect("/admin?bereich=einstellungen&message=Systemeinstellungen gespeichert.");
+}
+
+export async function saveEmailTemplatesAction(formData: FormData) {
+  const user = await requireAdmin();
+  const keys = Object.keys(emailTemplateNames) as EmailTemplateKey[];
+  const templates = keys.map((key) => ({
+    key,
+    name: emailTemplateNames[key],
+    subject: text(formData, `${key}_subject`),
+    text_body: text(formData, `${key}_text`),
+    html_body: text(formData, `${key}_html`),
+    updated_by: user.id,
+    updated_at: ""
+  }));
+
+  if (templates.some((template) => !template.subject || !template.text_body || !template.html_body)) {
+    redirect("/admin?bereich=mails&error=Bitte für jedes Template Betreff, Text und HTML ausfüllen.");
+  }
+
+  const { error } = await saveEmailTemplates(templates, user.id);
+  if (error) redirect(`/admin?bereich=mails&error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin");
+  redirect("/admin?bereich=mails&message=E-Mail-Templates gespeichert.");
 }
 
 export async function updateBookingStatusAction(formData: FormData) {

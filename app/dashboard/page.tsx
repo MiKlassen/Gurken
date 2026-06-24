@@ -96,7 +96,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
       <section className="quick-actions">
         <Link className="button primary" href="/book">
-          <CalendarDays size={18} /> Buchung bearbeiten
+          <CalendarDays size={18} /> {booking ? "Buchung ansehen" : "Buchung starten"}
         </Link>
         <Link className="button secondary" href="/location">
           <MapPin size={18} /> Ort ansehen

@@ -1,10 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
+import { bookingTemplateVariables } from "@/lib/booking-summary";
+import { getEmailTemplate, renderEmailTemplate } from "@/lib/email-templates";
 import { getSiteUrl } from "@/lib/env";
 import { decryptBookingFields, decryptProfileFields } from "@/lib/personal-data";
 import { getAppSettings } from "@/lib/app-settings";
 import { hasSmtpConfig, sendMail } from "@/lib/smtp";
-import type { BookingMode, BookingRecord, EventRecord, ProfileRecord } from "@/lib/types";
+import type { BookingRecord, EventRecord, ProfileRecord } from "@/lib/types";
 
 type ReminderEvent = Pick<
   EventRecord,
@@ -29,99 +30,12 @@ type ReminderResult = {
   reason?: string;
 };
 
-const bookingModeLabels: Record<BookingMode, string> = {
-  overnight: "Übernachtung",
-  day_guest: "Tagesgast"
-};
-
-function bookingPeriod(booking: ReminderBooking) {
-  if (booking.mode === "overnight") {
-    return `${formatDate(booking.arrival_date)} bis ${formatDate(booking.departure_date)}`;
-  }
-
-  return (booking.day_guest_dates || []).map(formatDate).join(", ") || "offen";
-}
-
-function firstName(booking: ReminderBooking) {
-  return booking.profiles?.first_name || "Gurke";
-}
-
 function reminderProfile(profile?: ProfileRecord | null) {
   if (!profile) return null;
   return {
     first_name: profile.first_name,
     last_name: profile.last_name,
     hometown: profile.hometown
-  };
-}
-
-function paymentLines(event: ReminderBooking["events"]) {
-  const lines = [];
-  if (event?.payment_iban) lines.push(`IBAN: ${event.payment_iban}`);
-  if (event?.payment_paypal_url) lines.push(`PayPal: ${event.payment_paypal_url}`);
-  if (event?.payment_note) lines.push(event.payment_note);
-  return lines;
-}
-
-function paymentHtml(event: ReminderBooking["events"]) {
-  const lines = paymentLines(event);
-  if (!lines.length) return "<p>Die Zahlungsdaten findest du im Mitgliederbereich.</p>";
-
-  return `<ul>${lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`;
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function buildReminderMail(email: string, booking: ReminderBooking) {
-  const event = booking.events;
-  const dashboardUrl = `${getSiteUrl()}/dashboard`;
-  const salutation = `Hallo ${firstName(booking)},`;
-  const title = event?.subject || event?.name || "Gurken Treffen";
-  const payment = paymentLines(event);
-
-  const text = [
-    salutation,
-    "",
-    `du hast für ${title} gebucht, aber deine Zahlung ist noch offen.`,
-    "",
-    `Buchung: ${bookingModeLabels[booking.mode]}`,
-    `Zeitraum: ${bookingPeriod(booking)}`,
-    `Personen: ${formatParticipantCount(booking.participant_count)}`,
-    `Betrag: ${formatCurrency(booking.amount_cents)}`,
-    "",
-    payment.length ? "Zahlungsdaten:" : "Die Zahlungsdaten findest du im Mitgliederbereich.",
-    ...payment,
-    "",
-    "Sobald ein Admin deine Zahlung als bezahlt markiert hat, bekommst du keine Reminder mehr.",
-    dashboardUrl
-  ].join("\n");
-
-  const html = [
-    `<p>${escapeHtml(salutation)}</p>`,
-    `<p>du hast für <strong>${escapeHtml(title)}</strong> gebucht, aber deine Zahlung ist noch offen.</p>`,
-    "<table>",
-    `<tr><td>Buchung</td><td>${escapeHtml(bookingModeLabels[booking.mode])}</td></tr>`,
-    `<tr><td>Zeitraum</td><td>${escapeHtml(bookingPeriod(booking))}</td></tr>`,
-    `<tr><td>Personen</td><td>${escapeHtml(formatParticipantCount(booking.participant_count))}</td></tr>`,
-    `<tr><td>Betrag</td><td><strong>${escapeHtml(formatCurrency(booking.amount_cents))}</strong></td></tr>`,
-    "</table>",
-    paymentHtml(event),
-    "<p>Sobald ein Admin deine Zahlung als bezahlt markiert hat, bekommst du keine Reminder mehr.</p>",
-    `<p><a href="${escapeHtml(dashboardUrl)}">Mitgliederbereich öffnen</a></p>`
-  ].join("");
-
-  return {
-    to: email,
-    subject: `Zahlung offen: ${title}`,
-    text,
-    html
   };
 }
 
@@ -215,6 +129,8 @@ export async function sendPaymentReminders(options: { enforceCronWindow?: boolea
   const thresholdIso = threshold.toISOString();
   const nowIso = now.toISOString();
   const bookings = await getDueBookings(thresholdIso, settings.paymentReminderBatchSize);
+  const template = await getEmailTemplate("payment_reminder");
+  const siteUrl = getSiteUrl();
   const result: ReminderResult = { checked: bookings.length, sent: 0, skipped: 0, errors: [] };
 
   for (const booking of bookings) {
@@ -232,7 +148,24 @@ export async function sendPaymentReminders(options: { enforceCronWindow?: boolea
         continue;
       }
 
-      await sendMail(buildReminderMail(email, booking));
+      const rendered = renderEmailTemplate(
+        template,
+        bookingTemplateVariables({
+          booking,
+          event: booking.events,
+          profile: booking.profiles,
+          email,
+          dashboardUrl: `${siteUrl}/dashboard`,
+          confirmationUrl: `${siteUrl}/book/confirmation`
+        })
+      );
+
+      await sendMail({
+        to: email,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html
+      });
       result.sent += 1;
     } catch (error) {
       await resetFailedClaim(booking);

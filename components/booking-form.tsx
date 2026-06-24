@@ -5,12 +5,9 @@ import { Beer, CalendarCheck, Moon } from "lucide-react";
 import { submitBookingAction } from "@/app/actions/booking";
 import { SubmitButton } from "@/components/submit-button";
 import { calculateBookingAmount } from "@/lib/booking";
+import { beerCrateLabel } from "@/lib/booking-summary";
 import { datesBetween, formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
 import type { BookingMode, BookingRecord, EventRecord } from "@/lib/types";
-
-function beerCrateLabel(count: number) {
-  return count === 1 ? "1 Bierkasten" : `${count} Bierkästen`;
-}
 
 export function BookingForm({ event, booking }: { event: EventRecord; booking: BookingRecord | null }) {
   const [mode, setMode] = useState<BookingMode>(booking?.mode || "overnight");

@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { sendBookingConfirmationEmail } from "@/lib/booking-confirmation-mail";
 import { requireCompleteProfile, requireVerifiedUser } from "@/lib/data";
-import { encryptBeerCrateRegion } from "@/lib/personal-data";
+import { decryptBookingFields, encryptBeerCrateRegion } from "@/lib/personal-data";
 import { createClient } from "@/lib/supabase/server";
-import type { BookingMode } from "@/lib/types";
+import type { BookingMode, BookingRecord, EventRecord } from "@/lib/types";
 
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -19,7 +20,7 @@ function int(formData: FormData, key: string) {
 
 export async function submitBookingAction(formData: FormData) {
   const user = await requireVerifiedUser();
-  await requireCompleteProfile(user.id);
+  const profile = await requireCompleteProfile(user.id);
 
   const eventId = text(formData, "eventId");
   const mode = text(formData, "mode") as BookingMode;
@@ -60,6 +61,27 @@ export async function submitBookingAction(formData: FormData) {
 
   if (error || !data) redirect(`/book?error=${encodeURIComponent(error?.message || "Buchung fehlgeschlagen.")}`);
 
+  const booking = decryptBookingFields(data as BookingRecord);
+  const { data: eventData } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
+  let message = "Buchung gespeichert.";
+
+  if (eventData) {
+    try {
+      const result = await sendBookingConfirmationEmail({
+        email: user.email,
+        event: eventData as EventRecord,
+        booking,
+        profile
+      });
+      if (result.sent) message = "Buchung gespeichert. Bestätigung wurde per Mail verschickt.";
+    } catch (mailError) {
+      console.error("Booking confirmation mail failed", mailError);
+      message = "Buchung gespeichert. Die Bestätigungs-Mail konnte nicht versendet werden.";
+    }
+  }
+
   revalidatePath("/dashboard");
-  redirect("/dashboard?message=Buchung gespeichert.");
+  revalidatePath("/book");
+  revalidatePath("/book/confirmation");
+  redirect(`/book/confirmation?message=${encodeURIComponent(message)}`);
 }

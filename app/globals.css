@@ -258,6 +258,7 @@ button:disabled {
 .app-shell > .form-panel,
 .app-shell > .photo-grid,
 .app-shell > .location-layout,
+.app-shell > .booking-confirmation,
 .app-shell > .admin-tabs,
 .app-shell > .admin-grid,
 .app-shell > .table-panel,
@@ -835,6 +836,59 @@ td span {
   line-height: 1.1;
 }
 
+.booking-confirmation {
+  display: grid;
+  gap: 16px;
+  padding-bottom: 72px;
+}
+
+.confirmation-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.confirmation-hero h2 {
+  margin: 4px 0 8px;
+  color: var(--green-dark);
+  font-size: 2rem;
+}
+
+.confirmation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.confirmation-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+  gap: 14px;
+}
+
+.confirmation-amount {
+  color: var(--green-dark);
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.payment-list {
+  display: grid;
+  gap: 6px;
+  border-left: 4px solid var(--yellow);
+  padding-left: 12px;
+}
+
+.payment-list p {
+  margin: 0;
+}
+
+.confirmation-actions {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .upload-panel {
   margin-top: 12px;
   margin-bottom: 22px;
@@ -972,6 +1026,26 @@ td span {
   color: var(--green-dark);
 }
 
+.mail-template-form {
+  gap: 22px;
+}
+
+.mail-template-editor {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: #fbfff5;
+}
+
+.mail-template-editor legend {
+  padding: 0 6px;
+  color: var(--green-dark);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
 .settings-title-row {
   margin-bottom: 0;
 }
@@ -1107,6 +1181,8 @@ th {
   .info-section,
   .dashboard-hero,
   .install-panel,
+  .confirmation-grid,
+  .confirmation-layout,
   .location-layout,
   .admin-grid {
     grid-template-columns: 1fr;
@@ -1160,6 +1236,7 @@ th {
   }
 
   .booking-total,
+  .confirmation-hero,
   .inline-reset,
   .install-panel-actions,
   .secret-status-grid,

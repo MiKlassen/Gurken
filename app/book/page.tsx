@@ -1,4 +1,5 @@
 import { CalendarDays } from "lucide-react";
+import { redirect } from "next/navigation";
 import { BookingForm } from "@/components/booking-form";
 import { BrandHeader } from "@/components/brand-header";
 import { getActiveEventForMember, getBookingForUser, getIsAdmin, requireCompleteProfile, requireVerifiedUser } from "@/lib/data";
@@ -13,6 +14,8 @@ export default async function BookPage({ searchParams }: { searchParams: SearchP
   const [params, isAdmin, event] = await Promise.all([searchParams, getIsAdmin(user.id, user.email), getActiveEventForMember()]);
   const error = typeof params.error === "string" ? params.error : "";
   const booking = event ? await getBookingForUser(event.id, user.id) : null;
+
+  if (event && booking) redirect("/book/confirmation");
 
   return (
     <main className="app-shell">

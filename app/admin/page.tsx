@@ -6,6 +6,7 @@ import {
   encryptExistingPersonalDataAction,
   promoteMemberToAdminAction,
   saveAppSettingsAction,
+  saveEmailTemplatesAction,
   saveEventAction,
   updateBookingStatusAction
 } from "@/app/actions/admin";
@@ -14,19 +15,21 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/submit-button";
 import { getAppSettings, getSecretConfigStatus } from "@/lib/app-settings";
 import { demoEvent, getAdminOverview, requireAdmin } from "@/lib/data";
+import { getEmailTemplates, templatePlaceholderHelp } from "@/lib/email-templates";
 import { formatCurrency, formatDate, formatDateTime, formatParticipantCount } from "@/lib/format";
 import type { BookingMode, BookingRecord, BookingStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-type AdminSection = "buchungen" | "mitglieder" | "event" | "admins" | "einstellungen";
+type AdminSection = "buchungen" | "mitglieder" | "event" | "admins" | "mails" | "einstellungen";
 
 const adminSections: { id: AdminSection; label: string }[] = [
   { id: "buchungen", label: "Buchungen" },
   { id: "mitglieder", label: "Mitglieder" },
   { id: "event", label: "Event" },
   { id: "admins", label: "Admins" },
+  { id: "mails", label: "E-Mails" },
   { id: "einstellungen", label: "Einstellungen" }
 ];
 
@@ -65,9 +68,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   const activeSection = getAdminSection(params.bereich);
   const error = typeof params.error === "string" ? params.error : "";
   const message = typeof params.message === "string" ? params.message : "";
-  const [{ events, bookings, profiles, adminMemberships }, appSettings] = await Promise.all([
+  const [{ events, bookings, profiles, adminMemberships }, appSettings, mailTemplates] = await Promise.all([
     getAdminOverview(),
-    getAppSettings()
+    getAppSettings(),
+    getEmailTemplates()
   ]);
   const secretStatus = getSecretConfigStatus();
   const activeEvent = events.find((event) => event.is_active) || events[0] || demoEvent;
@@ -498,6 +502,42 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             SMTP_USER, SMTP_PASSWORD und CRON_SECRET bleiben serverseitige Environment Variables und werden hier nicht gespeichert.
           </p>
           <SubmitButton>Systemeinstellungen speichern</SubmitButton>
+        </form>
+      </section>
+      ) : null}
+
+      {activeSection === "mails" ? (
+      <section className="admin-grid admin-grid-single">
+        <form className="form-panel admin-form mail-template-form" action={saveEmailTemplatesAction}>
+          <div className="section-title-row settings-title-row">
+            <div>
+              <h2>E-Mail-Templates</h2>
+              <p className="form-hint">Diese Vorlagen werden für Buchungsbestätigung und Zahlungsreminder genutzt.</p>
+            </div>
+          </div>
+          <p className="legal-note">
+            Platzhalter: {templatePlaceholderHelp.map((placeholder) => `{{${placeholder}}}`).join(", ")}
+          </p>
+
+          {mailTemplates.map((template) => (
+            <fieldset className="mail-template-editor" key={template.key}>
+              <legend>{template.name}</legend>
+              <label>
+                Betreff
+                <input name={`${template.key}_subject`} defaultValue={template.subject} required />
+              </label>
+              <label>
+                Text-Version
+                <textarea name={`${template.key}_text`} defaultValue={template.text_body} rows={10} required />
+              </label>
+              <label>
+                HTML-Version
+                <textarea name={`${template.key}_html`} defaultValue={template.html_body} rows={12} required />
+              </label>
+            </fieldset>
+          ))}
+
+          <SubmitButton>E-Mail-Templates speichern</SubmitButton>
         </form>
       </section>
       ) : null}

@@ -79,3 +79,15 @@ export type AppSettingRecord = {
   updated_by: string | null;
   updated_at: string;
 };
+
+export type EmailTemplateKey = "booking_confirmation" | "payment_reminder";
+
+export type EmailTemplateRecord = {
+  key: EmailTemplateKey;
+  name: string;
+  subject: string;
+  text_body: string;
+  html_body: string;
+  updated_by: string | null;
+  updated_at: string;
+};
