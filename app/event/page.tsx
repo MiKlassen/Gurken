@@ -142,14 +142,14 @@ export default async function EventPage({ searchParams }: { searchParams: Search
       <section className="page-heading">
         <ClipboardList size={34} />
         <div>
-          <h1>Event</h1>
+          <h1>Belegung und Auslastung</h1>
           <p>{activeEvent.subject || activeEvent.name}</p>
         </div>
       </section>
       {error ? <p className="notice error">{error}</p> : null}
       {message ? <p className="notice success">{message}</p> : null}
 
-      <section className="event-metrics" aria-label="Eventkennzahlen">
+      <section className="event-metrics" aria-label="Belegungs- und Auslastungskennzahlen">
         <article className="panel">
           <CalendarDays />
           <h2>Zeitraum</h2>

@@ -12,7 +12,7 @@
   --blue: #dff2f6;
   --shadow: 0 18px 44px rgba(36, 60, 20, 0.12);
   --radius: 8px;
-  --content: 1180px;
+  --content: none;
 }
 
 * {

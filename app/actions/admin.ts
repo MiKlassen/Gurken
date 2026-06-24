@@ -386,7 +386,33 @@ export async function confirmBookingAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/dashboard");
   revalidatePath("/book/confirmation");
-  redirect("/admin?bereich=buchungen&message=Buchung bestätigt.");
+  redirect("/admin?bereich=buchungen&message=Zahlung bestätigt.");
+}
+
+export async function revokeBookingPaymentAction(formData: FormData) {
+  await requireAdmin();
+
+  const bookingId = text(formData, "bookingId");
+  if (!bookingId) {
+    redirect("/admin?bereich=buchungen&error=Buchung fehlt.");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("bookings")
+    .update({
+      status: "pending_payment" satisfies BookingStatus,
+      paid_amount_cents: 0,
+      payment_confirmed_at: null
+    })
+    .eq("id", bookingId);
+
+  if (error) redirect(`/admin?bereich=buchungen&error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  revalidatePath("/book/confirmation");
+  redirect("/admin?bereich=buchungen&message=Zahlung zurückgenommen.");
 }
 
 export async function promoteMemberToAdminAction(formData: FormData) {

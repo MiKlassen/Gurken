@@ -6,6 +6,7 @@ import {
   deleteRoomAction,
   encryptExistingPersonalDataAction,
   promoteMemberToAdminAction,
+  revokeBookingPaymentAction,
   saveAppSettingsAction,
   saveEmailTemplatesAction,
   saveEventAction,
@@ -31,7 +32,7 @@ type AdminSection = "buchungen" | "mitglieder" | "event" | "ort" | "admins" | "m
 const adminSections: { id: AdminSection; label: string }[] = [
   { id: "buchungen", label: "Buchungen" },
   { id: "mitglieder", label: "Mitglieder" },
-  { id: "event", label: "Event" },
+  { id: "event", label: "Eckdaten" },
   { id: "ort", label: "Ortseinstellungen" },
   { id: "admins", label: "Admins" },
   { id: "mails", label: "E-Mails" },
@@ -205,8 +206,24 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                         {booking.status !== "paid" && booking.status !== "cancelled" ? (
                           <form action={confirmBookingAction}>
                             <input type="hidden" name="bookingId" value={booking.id} />
-                            <SubmitButton className="button primary small" pendingLabel="Bestätigt...">
+                            <SubmitButton
+                              className="button primary small"
+                              confirmMessage="Zahlung wirklich als bezahlt bestätigen?"
+                              pendingLabel="Bestätigt..."
+                            >
                               Bestätigen
+                            </SubmitButton>
+                          </form>
+                        ) : null}
+                        {booking.paid_amount_cents > 0 || booking.status === "paid" ? (
+                          <form action={revokeBookingPaymentAction}>
+                            <input type="hidden" name="bookingId" value={booking.id} />
+                            <SubmitButton
+                              className="button ghost small"
+                              confirmMessage="Zahlungsbestätigung wirklich zurücknehmen?"
+                              pendingLabel="Nimmt zurück..."
+                            >
+                              Zahlung zurücknehmen
                             </SubmitButton>
                           </form>
                         ) : null}
@@ -219,7 +236,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                               </option>
                             ))}
                           </select>
-                          <SubmitButton className="button secondary small" pendingLabel="Speichert...">
+                          <SubmitButton
+                            className="button secondary small"
+                            confirmMessage="Buchungsstatus wirklich speichern? Bei Status bezahlt wird die Zahlung bestätigt."
+                            pendingLabel="Speichert..."
+                          >
                             Speichern
                           </SubmitButton>
                         </form>
@@ -325,7 +346,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       {activeSection === "event" ? (
       <section className="admin-grid admin-grid-single">
         <form className="form-panel admin-form" action={saveEventAction}>
-          <h2>Event konfigurieren</h2>
+          <h2>Eckdaten konfigurieren</h2>
           <p className="form-hint">Startdatum, Enddatum und Preise steuern den Buchungszeitraum und die Betragsberechnung.</p>
           {activeEvent.id !== "demo" ? <input type="hidden" name="eventId" value={activeEvent.id} /> : null}
           <div className="form-grid two">

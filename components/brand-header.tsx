@@ -37,7 +37,7 @@ function NavItems({ isAuthed, isAdmin }: BrandHeaderProps) {
       {isAdmin ? (
         <>
           <Link href="/event">
-            <ClipboardList size={18} /> Event
+            <ClipboardList size={18} /> Belegung und Auslastung
           </Link>
           <Link href="/admin">
             <ShieldCheck size={18} /> Admin
