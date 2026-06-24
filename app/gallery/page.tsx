@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Images } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
+import { GalleryGrid } from "@/components/gallery-grid";
 import { GalleryUpload } from "@/components/gallery-upload";
 import { InstallAppPrompt } from "@/components/install-app-prompt";
 import { getActiveEventForMember, getIsAdmin, listGalleryPhotos, requireCompleteProfile, requireVerifiedUser } from "@/lib/data";
@@ -35,22 +35,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
       {message ? <p className="notice success">{message}</p> : null}
       <InstallAppPrompt />
       <GalleryUpload />
-      <section className="photo-grid">
-        {photos.map((photo) => (
-          <figure key={photo.id}>
-            <div className="photo-frame">
-              <Image
-                src={photo.signedUrl}
-                alt={photo.caption || "Galeriefoto"}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw"
-                unoptimized
-              />
-            </div>
-            {photo.caption ? <figcaption>{photo.caption}</figcaption> : null}
-          </figure>
-        ))}
-      </section>
+      <GalleryGrid photos={photos} isAdmin={isAdmin} />
     </main>
   );
 }

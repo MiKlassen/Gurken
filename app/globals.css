@@ -186,6 +186,13 @@ button:disabled {
   color: var(--green-dark);
 }
 
+.button.danger {
+  border: 1px solid #edb0a9;
+  background: #fff1ef;
+  color: #8e2a20;
+  box-shadow: none;
+}
+
 .button.ghost {
   min-height: 36px;
   background: transparent;
@@ -1015,24 +1022,199 @@ td span {
   padding-bottom: 70px;
 }
 
-.photo-grid figure {
+.photo-card {
   margin: 0;
   overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 14px 36px rgba(31, 72, 19, 0.08);
+}
+
+.photo-open-button {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+.photo-open-button:focus-visible {
+  outline: 3px solid #a8d65a;
+  outline-offset: -3px;
 }
 
 .photo-frame {
   position: relative;
   aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #eef7e5;
 }
 
 .photo-frame img {
   object-fit: cover;
+  transition: transform 160ms ease;
+}
+
+.photo-open-button:hover .photo-frame img {
+  transform: scale(1.03);
+}
+
+.photo-open-hint {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: rgba(17, 23, 13, 0.78);
+  color: #fff;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.photo-open-button:hover .photo-open-hint,
+.photo-open-button:focus-visible .photo-open-hint {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .photo-grid figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   padding: 10px 12px;
   color: var(--muted);
   font-weight: 800;
+}
+
+.photo-grid figcaption > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.photo-delete-form {
+  flex: 0 0 auto;
+}
+
+.photo-delete-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #edb0a9;
+  border-radius: 999px;
+  background: #fff1ef;
+  color: #8e2a20;
+  padding: 6px 9px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.photo-empty {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: #fbfff5;
+  color: var(--muted);
+  padding: 18px;
+  font-weight: 800;
+}
+
+.photo-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: rgba(9, 17, 7, 0.84);
+  padding: 18px;
+}
+
+.photo-lightbox {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: min(100%, 1120px);
+  max-height: calc(100vh - 36px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius);
+  background: #10170d;
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+}
+
+.photo-lightbox-image {
+  position: relative;
+  height: min(76vh, 760px);
+  min-height: 280px;
+  background: #0f150d;
+}
+
+.photo-lightbox-image img {
+  object-fit: contain;
+}
+
+.photo-lightbox-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(16, 23, 13, 0.94);
+  color: #eef8dd;
+  padding: 14px 16px;
+}
+
+.photo-lightbox-footer p {
+  margin: 0;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.photo-lightbox-close,
+.photo-lightbox-nav {
+  position: absolute;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(16, 23, 13, 0.76);
+  color: #fff;
+  cursor: pointer;
+}
+
+.photo-lightbox-close {
+  top: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+}
+
+.photo-lightbox-nav {
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  transform: translateY(-50%);
+}
+
+.photo-lightbox-nav.previous {
+  left: 12px;
+}
+
+.photo-lightbox-nav.next {
+  right: 12px;
 }
 
 .slideshow-shell {
@@ -1890,6 +2072,34 @@ th {
   .install-fallback {
     max-width: none;
     text-align: left;
+  }
+
+  .photo-lightbox-backdrop {
+    padding: 8px;
+  }
+
+  .photo-lightbox {
+    max-height: calc(100vh - 16px);
+  }
+
+  .photo-lightbox-image {
+    height: 68vh;
+    min-height: 260px;
+  }
+
+  .photo-lightbox-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .photo-lightbox-footer .photo-delete-form,
+  .photo-lightbox-footer .button {
+    width: 100%;
+  }
+
+  .photo-lightbox-nav {
+    width: 42px;
+    height: 42px;
   }
 
   .page-heading,
