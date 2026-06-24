@@ -64,8 +64,8 @@ export function InstallAppPrompt() {
         <div>
           <h2 id="install-app-title">Galerie vom Handy vorbereiten</h2>
           <p>
-            Installiere die App auf dem Handy und bleib eingeloggt. Danach taucht Gurken beim Teilen von Bildern aus
-            der Foto-App als Ziel auf.
+            Installiere Gurken auf dem Handy und bleib eingeloggt. Danach erscheint Gurken im Teilen-Menü deiner
+            Foto-App.
           </p>
         </div>
       </div>
@@ -78,7 +78,7 @@ export function InstallAppPrompt() {
         ) : installPrompt ? (
           <button className="button primary" type="button" onClick={installApp} disabled={isPrompting}>
             <Download size={18} aria-hidden="true" />
-            {isPrompting ? "Öffnet..." : "App installieren"}
+            {isPrompting ? "Öffnet..." : "Auf diesem Gerät installieren"}
           </button>
         ) : (
           <p className="install-fallback">
@@ -97,7 +97,7 @@ export function InstallAppPrompt() {
       </div>
       <div className="install-panel-note">
         <Share2 size={18} aria-hidden="true" />
-        <span>Mehrfachauswahl in der Foto-App teilen und anschließend Gurken auswählen.</span>
+        <span>Nach der Installation: Fotos markieren, Teilen öffnen, Gurken auswählen.</span>
       </div>
     </section>
   );

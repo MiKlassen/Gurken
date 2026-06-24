@@ -1,0 +1,17 @@
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp?project_ref=fxkveerdcglqpbdqvyhq"
+
+[hooks.state]
+
+[hooks.state."vercel-plugin@plugins-cli:hooks/hooks.json:session_start:0:2"]
+trusted_hash = "sha256:7c0c78b3d111a81aed993357e32d997f3996cf32bbf4ab475efe9ce08772673a"
+
+[hooks.state."vercel-plugin@plugins-cli:hooks/hooks.json:session_start:0:1"]
+trusted_hash = "sha256:1b7bf88920f9d93c5bd508088299ba969739865da51a3043b931819328abf7d5"
+
+[hooks.state."vercel-plugin@plugins-cli:hooks/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:146eedfa10f48cfcb6d2cfb2c8fc36e8d8bb8751d2167ba205fa0b967c8a7f6e"
+enabled = true
+
+[plugins."vercel-plugin@plugins-cli"]
+enabled = true

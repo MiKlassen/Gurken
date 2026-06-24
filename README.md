@@ -15,7 +15,7 @@ Internes Buchungssystem für das Stimme-Stämme-Treffen.
    ```bash
    pnpm install
    ```
-2. `.env.example` nach `.env.local` übernehmen und Werte setzen. Als Supabase-Client-Key akzeptiert die App `NEXT_PUBLIC_SUPABASE_ANON_KEY` oder `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+2. `.env.example` nach `.env.local` übernehmen und Werte setzen. In Production muss `SITE_URL=https://www.gurken.family` gesetzt sein, damit Auth- und Mail-Links auf die Domain zeigen. Als Supabase-Client-Key akzeptiert die App `NEXT_PUBLIC_SUPABASE_ANON_KEY` oder `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 3. In Supabase die Migration `supabase/migrations/001_initial.sql` ausführen.
 4. Optional `supabase/seed.sql` ausführen, um ein erstes aktives Treffen anzulegen.
 5. `PERSONAL_DATA_ENCRYPTION_KEY` setzen. Der Wert muss ein 32-Byte-Schlüssel sein, z. B. erzeugt mit:
@@ -24,6 +24,25 @@ Internes Buchungssystem für das Stimme-Stämme-Treffen.
    ```
    Den Schlüssel nur serverseitig setzen, niemals mit `NEXT_PUBLIC_` prefixen. Ohne diesen Schlüssel können neue Profile, Buchungen und Galerie-Captions nicht verschlüsselt gespeichert werden.
 6. `INITIAL_ADMIN_EMAILS` setzen. Wenn sich eine dieser Adressen verifiziert einloggt und `SUPABASE_SERVICE_ROLE_KEY` gesetzt ist, wird sie automatisch Admin.
+
+## Supabase Auth Redirects
+
+Für Production müssen Supabase und Vercel dieselbe kanonische Domain verwenden:
+
+- Vercel Environment Variable: `SITE_URL=https://www.gurken.family`
+- Supabase Auth > URL Configuration > Site URL: `https://www.gurken.family`
+- Supabase Auth > URL Configuration > Redirect URLs: `https://www.gurken.family/**`
+- Optional lokal zusätzlich: `http://localhost:3000/**`
+
+Wenn Supabase die angefragte Redirect URL nicht erlaubt, fällt die Mailverifizierung auf die Supabase Site URL zurück. Dann landen Mails schnell auf einer Vercel-Preview- oder Projekt-URL statt auf `gurken.family`.
+
+Für die Supabase-Confirmation-Mail kann der Button entweder `{{ .ConfirmationURL }}` nutzen oder direkt auf unsere Callback-Route zeigen:
+
+```html
+<a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=signup&next=/onboarding">E-Mail bestätigen</a>
+```
+
+SMTP-Linktracking sollte für Auth-Mails deaktiviert bleiben, weil Tracking-Wrapper Auth-Queryparameter verändern oder Einmal-Links vorab öffnen können.
 
 ## Lokale Befehle
 

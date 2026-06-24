@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Images } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
 import { GalleryUpload } from "@/components/gallery-upload";
+import { InstallAppPrompt } from "@/components/install-app-prompt";
 import { getActiveEventForMember, getIsAdmin, listGalleryPhotos, requireCompleteProfile, requireVerifiedUser } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
       </section>
       {error ? <p className="notice error">{error}</p> : null}
       {message ? <p className="notice success">{message}</p> : null}
+      <InstallAppPrompt />
       <GalleryUpload />
       <section className="photo-grid">
         {photos.map((photo) => (

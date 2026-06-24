@@ -28,8 +28,20 @@ export function requireSupabaseEnv() {
   return { url, anonKey };
 }
 
+function normalizeSiteUrl(value?: string) {
+  if (!value) return "";
+  const withProtocol = /^https?:\/\//.test(value) ? value : `https://${value}`;
+  return withProtocol.replace(/\/$/, "");
+}
+
 export function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  return (
+    normalizeSiteUrl(process.env.SITE_URL) ||
+    normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
+    normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ||
+    normalizeSiteUrl(process.env.VERCEL_URL) ||
+    "http://localhost:3000"
+  );
 }
 
 export function getInitialAdminEmails() {

@@ -104,6 +104,45 @@ select {
   text-decoration: none;
 }
 
+.nav-toggle-input,
+.nav-toggle-button,
+.drawer-backdrop,
+.mobile-nav-drawer {
+  display: none;
+}
+
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 28px 24px 34px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.site-footer p {
+  margin: 0;
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
+.site-footer nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.site-footer a {
+  color: var(--green-dark);
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .button,
 button.button {
   display: inline-flex;
@@ -932,7 +971,8 @@ td span {
 
 .slideshow-shell .brand,
 .slideshow-shell .nav-links a,
-.slideshow-shell .button.ghost {
+.slideshow-shell .button.ghost,
+.slideshow-shell .nav-toggle-button {
   color: #fff;
 }
 
@@ -1212,10 +1252,138 @@ th {
 }
 
 @media (max-width: 640px) {
-  .site-header,
-  .nav-links {
+  .site-header {
+    position: sticky;
+    top: 0;
+    align-items: center;
+    padding: 12px 16px;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .brand span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
+  .nav-toggle-input {
+    position: fixed;
+    display: block;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .nav-toggle-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-strong);
+    color: var(--green-dark);
+    cursor: pointer;
+  }
+
+  .drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(23, 35, 17, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease;
+  }
+
+  .mobile-nav-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
+    width: min(86vw, 340px);
+    border-left: 1px solid var(--line);
+    padding: 18px;
+    background: var(--bg);
+    box-shadow: -22px 0 44px rgba(23, 35, 17, 0.18);
+    transform: translateX(100%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 180ms ease;
+  }
+
+  .nav-toggle-input:checked ~ .drawer-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-toggle-input:checked ~ .mobile-nav-drawer {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .drawer-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius);
+    color: var(--green-dark);
+    cursor: pointer;
+  }
+
+  .drawer-links {
+    display: grid;
+    gap: 8px;
+    padding-top: 18px;
+  }
+
+  .drawer-links a,
+  .drawer-links .button,
+  .drawer-links button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 46px;
+    color: var(--green-dark);
+    text-decoration: none;
+  }
+
+  .drawer-links a:not(.button),
+  .drawer-links .button.ghost {
+    padding: 10px 8px;
+    font-size: 1rem;
+    font-weight: 900;
+  }
+
+  .drawer-links form {
+    display: grid;
   }
 
   .hero-section {
@@ -1255,5 +1423,15 @@ th {
   .page-heading.spread > div {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .site-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 24px 16px 30px;
+  }
+
+  .site-footer nav {
+    justify-content: flex-start;
   }
 }
