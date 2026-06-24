@@ -39,7 +39,7 @@ pnpm build
 - Onboarding: Vorname, Name und Wohnort sind Pflicht vor Mitgliederbereich/Buchung/Galerie.
 - Buchung: Übernachtung pro Nacht oder Tagesgasttage für 1 bis 3 Personen, Betrag wird pro Person berechnet und beim Absenden gespeichert.
 - Zahlung: offline per IBAN/PayPal.me; Admin markiert Buchungen manuell als bezahlt.
-- Zahlungsreminder: Vercel Cron ruft stündlich `/api/cron/payment-reminders` auf. Ob und wann Mails rausgehen, entscheidet die Admin-Konfiguration in Supabase. Offene Buchungen (`pending_payment`) bekommen nach dem konfigurierten Intervall erneut eine SMTP-Mail, bis ein Admin sie als bezahlt markiert.
+- Zahlungsreminder: Vercel Cron ruft täglich `/api/cron/payment-reminders` auf. Ob Reminder aktiv sind und in welchem Intervall Mails erneut rausgehen, entscheidet die Admin-Konfiguration in Supabase. Offene Buchungen (`pending_payment`) bekommen nach dem konfigurierten Intervall erneut eine SMTP-Mail, bis ein Admin sie als bezahlt markiert.
 - Ort: verifizierte Mitglieder sehen Adresse, Ortslink, Hinweise und zwei optionale Zusatzfelder auf `/location`.
 - Galerie: verifizierte Mitglieder laden ein oder mehrere Bilder in den privaten Supabase-Storage-Bucket `gallery`; die App erzeugt Signed URLs.
 - Mobile Galerie: die App hat ein Web-Share-Target. Nach Installation auf dem Handy können Bilder aus anderen Apps per Teilen-Menü an die Live-Galerie gesendet werden.
@@ -64,6 +64,6 @@ Nicht-geheime Werte werden im Adminbereich unter Systemeinstellungen gepflegt:
 
 - SMTP: Host, Port, TLS/STARTTLS, Absender, Reply-To, Timeout
 - Reminder: aktiv/inaktiv, Intervall in Tagen, Batchgröße
-- Cron: aktiv/inaktiv, Versandstunde, Zeitzone
+- Cron: aktiv/inaktiv. Die Vercel-Hobby-Frequenz bleibt in `vercel.json` einmal täglich, weil häufigere Cron-Ausdrücke auf Hobby beim Deployment fehlschlagen.
 
 Die gleichnamigen Env-Werte in `.env.example` sind nur Fallbacks, solange noch nichts in `app_settings` gespeichert ist.

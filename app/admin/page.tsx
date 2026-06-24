@@ -447,17 +447,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </div>
 
           <h3>Cron</h3>
-          <div className="form-grid three">
+          <div className="form-grid two">
             <label className="checkbox-line">
               <input name="paymentReminderCronEnabled" type="checkbox" defaultChecked={appSettings.paymentReminderCronEnabled} /> Cron aktiv
-            </label>
-            <label>
-              Versandstunde
-              <input name="paymentReminderCronHour" type="number" min={0} max={23} defaultValue={appSettings.paymentReminderCronHour} />
-            </label>
-            <label>
-              Zeitzone
-              <input name="paymentReminderCronTimezone" defaultValue={appSettings.paymentReminderCronTimezone} required />
             </label>
           </div>
 

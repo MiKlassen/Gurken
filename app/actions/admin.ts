@@ -65,15 +65,6 @@ function optionalUrl(formData: FormData, key: string) {
   }
 }
 
-function isValidTimeZone(value: string) {
-  try {
-    new Intl.DateTimeFormat("de-DE", { timeZone: value }).format(new Date());
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export async function saveEventAction(formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();
@@ -144,12 +135,6 @@ export async function saveEventAction(formData: FormData) {
 
 export async function saveAppSettingsAction(formData: FormData) {
   const user = await requireAdmin();
-  const timezone = text(formData, "paymentReminderCronTimezone") || "Europe/Berlin";
-
-  if (!isValidTimeZone(timezone)) {
-    redirect("/admin?error=Bitte eine gültige Zeitzone angeben, z.B. Europe/Berlin.");
-  }
-
   const smtpPort = boundedInt(formData, "smtpPort", 587, 1, 65_535);
   const settings: AppSettings = {
     smtpHost: text(formData, "smtpHost"),
@@ -162,9 +147,7 @@ export async function saveAppSettingsAction(formData: FormData) {
     paymentRemindersEnabled: checkbox(formData, "paymentRemindersEnabled"),
     paymentReminderIntervalDays: boundedInt(formData, "paymentReminderIntervalDays", 7, 1, 365),
     paymentReminderBatchSize: boundedInt(formData, "paymentReminderBatchSize", 50, 1, 100),
-    paymentReminderCronEnabled: checkbox(formData, "paymentReminderCronEnabled"),
-    paymentReminderCronHour: boundedInt(formData, "paymentReminderCronHour", 8, 0, 23),
-    paymentReminderCronTimezone: timezone
+    paymentReminderCronEnabled: checkbox(formData, "paymentReminderCronEnabled")
   };
 
   if (!settings.smtpFrom) {

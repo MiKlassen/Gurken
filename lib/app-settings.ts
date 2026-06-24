@@ -13,8 +13,6 @@ export type AppSettings = {
   paymentReminderIntervalDays: number;
   paymentReminderBatchSize: number;
   paymentReminderCronEnabled: boolean;
-  paymentReminderCronHour: number;
-  paymentReminderCronTimezone: string;
 };
 
 export type SecretConfigStatus = {
@@ -39,9 +37,7 @@ const settingKeys = {
   paymentRemindersEnabled: "payment_reminders_enabled",
   paymentReminderIntervalDays: "payment_reminder_interval_days",
   paymentReminderBatchSize: "payment_reminder_batch_size",
-  paymentReminderCronEnabled: "payment_reminder_cron_enabled",
-  paymentReminderCronHour: "payment_reminder_cron_hour",
-  paymentReminderCronTimezone: "payment_reminder_cron_timezone"
+  paymentReminderCronEnabled: "payment_reminder_cron_enabled"
 } as const satisfies Record<keyof AppSettings, string>;
 
 function envFlag(name: string, defaultValue: boolean) {
@@ -69,9 +65,7 @@ function baseSettings(): AppSettings {
     paymentRemindersEnabled: envFlag("PAYMENT_REMINDERS_ENABLED", true),
     paymentReminderIntervalDays: envInt("PAYMENT_REMINDER_INTERVAL_DAYS", 7, 1, 365),
     paymentReminderBatchSize: envInt("PAYMENT_REMINDER_BATCH_SIZE", 50, 1, 100),
-    paymentReminderCronEnabled: envFlag("PAYMENT_REMINDER_CRON_ENABLED", true),
-    paymentReminderCronHour: envInt("PAYMENT_REMINDER_CRON_HOUR", 8, 0, 23),
-    paymentReminderCronTimezone: process.env.PAYMENT_REMINDER_CRON_TIMEZONE || "Europe/Berlin"
+    paymentReminderCronEnabled: envFlag("PAYMENT_REMINDER_CRON_ENABLED", true)
   };
 }
 
@@ -147,12 +141,6 @@ export async function getAppSettings(): Promise<AppSettings> {
         rows,
         settingKeys.paymentReminderCronEnabled,
         fallback.paymentReminderCronEnabled
-      ),
-      paymentReminderCronHour: intSetting(rows, settingKeys.paymentReminderCronHour, fallback.paymentReminderCronHour, 0, 23),
-      paymentReminderCronTimezone: stringSetting(
-        rows,
-        settingKeys.paymentReminderCronTimezone,
-        fallback.paymentReminderCronTimezone
       )
     };
   } catch {

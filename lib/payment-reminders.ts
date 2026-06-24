@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
 import { getSiteUrl } from "@/lib/env";
 import { decryptBookingFields, decryptProfileFields } from "@/lib/personal-data";
-import { getAppSettings, type AppSettings } from "@/lib/app-settings";
+import { getAppSettings } from "@/lib/app-settings";
 import { hasSmtpConfig, sendMail } from "@/lib/smtp";
 import type { BookingMode, BookingRecord, EventRecord, ProfileRecord } from "@/lib/types";
 
@@ -196,36 +196,6 @@ async function resetFailedClaim(booking: ReminderBooking) {
     .eq("status", "pending_payment");
 }
 
-function zonedHour(date: Date, timeZone: string) {
-  try {
-    return Number.parseInt(
-      new Intl.DateTimeFormat("en-US", { hour: "2-digit", hourCycle: "h23", timeZone }).format(date),
-      10
-    );
-  } catch {
-    return Number.parseInt(
-      new Intl.DateTimeFormat("en-US", { hour: "2-digit", hourCycle: "h23", timeZone: "Europe/Berlin" }).format(date),
-      10
-    );
-  }
-}
-
-function shouldRunCron(settings: AppSettings, now: Date) {
-  if (!settings.paymentReminderCronEnabled) {
-    return { ok: false, reason: "Reminder-Cron ist deaktiviert." };
-  }
-
-  const currentHour = zonedHour(now, settings.paymentReminderCronTimezone);
-  if (currentHour !== settings.paymentReminderCronHour) {
-    return {
-      ok: false,
-      reason: `Außerhalb des Reminder-Zeitfensters (${currentHour}:00 statt ${settings.paymentReminderCronHour}:00).`
-    };
-  }
-
-  return { ok: true, reason: "" };
-}
-
 export async function sendPaymentReminders(options: { enforceCronWindow?: boolean; now?: Date } = {}): Promise<ReminderResult> {
   const settings = await getAppSettings();
   if (!settings.paymentRemindersEnabled) {
@@ -233,11 +203,8 @@ export async function sendPaymentReminders(options: { enforceCronWindow?: boolea
   }
 
   const now = options.now || new Date();
-  if (options.enforceCronWindow) {
-    const cron = shouldRunCron(settings, now);
-    if (!cron.ok) {
-      return { checked: 0, sent: 0, skipped: 0, errors: [], disabled: true, reason: cron.reason };
-    }
+  if (options.enforceCronWindow && !settings.paymentReminderCronEnabled) {
+    return { checked: 0, sent: 0, skipped: 0, errors: [], disabled: true, reason: "Reminder-Cron ist deaktiviert." };
   }
 
   if (!(await hasSmtpConfig())) {
