@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Beer, CalendarDays, Images, MapPin, Menu, ShieldCheck, Sprout, X } from "lucide-react";
+import { Beer, CalendarDays, ClipboardList, Images, MapPin, Menu, ShieldCheck, Sprout, X } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 
 type BrandHeaderProps = {
@@ -35,9 +35,14 @@ function NavItems({ isAuthed, isAdmin }: BrandHeaderProps) {
         <Images size={18} /> Galerie
       </Link>
       {isAdmin ? (
-        <Link href="/admin">
-          <ShieldCheck size={18} /> Admin
-        </Link>
+        <>
+          <Link href="/event">
+            <ClipboardList size={18} /> Event
+          </Link>
+          <Link href="/admin">
+            <ShieldCheck size={18} /> Admin
+          </Link>
+        </>
       ) : null}
       <form action={signOutAction}>
         <button className="button ghost" type="submit">

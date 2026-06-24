@@ -5,7 +5,7 @@ import { Beer, CalendarCheck, Moon } from "lucide-react";
 import { submitBookingAction } from "@/app/actions/booking";
 import { SubmitButton } from "@/components/submit-button";
 import { calculateBookingAmount } from "@/lib/booking";
-import { beerCrateLabel } from "@/lib/booking-summary";
+import { beerCrateLabel, bookingPaymentSummary } from "@/lib/booking-summary";
 import { datesBetween, formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
 import type { BookingMode, BookingRecord, EventRecord } from "@/lib/types";
 
@@ -15,14 +15,15 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
   const [departureDate, setDepartureDate] = useState(booking?.departure_date || event.ends_on);
   const [dayGuestDates, setDayGuestDates] = useState<string[]>(booking?.day_guest_dates || [event.starts_on]);
   const [participantCount, setParticipantCount] = useState(booking?.participant_count || 1);
-  const locked = booking?.status === "paid";
   const eventDays = useMemo(() => datesBetween(event.starts_on, event.ends_on), [event.starts_on, event.ends_on]);
   const amount = calculateBookingAmount(event, { mode, arrivalDate, departureDate, dayGuestDates, participantCount });
+  const paymentPreview = booking ? { amount_cents: amount, paid_amount_cents: booking.paid_amount_cents } : null;
 
   return (
     <form className="form-panel booking-panel" action={submitBookingAction}>
       <input type="hidden" name="eventId" value={event.id} />
       <input type="hidden" name="mode" value={mode} />
+      {booking ? <input type="hidden" name="bookingId" value={booking.id} /> : null}
 
       <div className="segmented" aria-label="Buchungsart">
         <button className={mode === "overnight" ? "active" : ""} type="button" onClick={() => setMode("overnight")}>
@@ -39,7 +40,6 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
           name="participantCount"
           value={participantCount}
           onChange={(event) => setParticipantCount(Number.parseInt(event.target.value, 10))}
-          disabled={locked}
           required
         >
           <option value={1}>Ich komme alleine</option>
@@ -59,7 +59,6 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
               max={event.ends_on}
               value={arrivalDate}
               onChange={(event) => setArrivalDate(event.target.value)}
-              disabled={locked}
               required
             />
           </label>
@@ -72,13 +71,12 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
               max={event.ends_on}
               value={departureDate}
               onChange={(event) => setDepartureDate(event.target.value)}
-              disabled={locked}
               required
             />
           </label>
         </div>
       ) : (
-        <fieldset className="day-grid" disabled={locked}>
+        <fieldset className="day-grid">
           <legend>Tage auswählen</legend>
           {eventDays.map((day) => (
             <label key={day} className="check-tile">
@@ -105,7 +103,6 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
           name="beerCrateRegion"
           defaultValue={booking?.beer_crate_region || ""}
           placeholder="z.B. Franken, Ruhrpott, Tirol..."
-          disabled={locked}
         />
       </label>
 
@@ -120,11 +117,15 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
         </p>
       </div>
 
-      {locked ? (
-        <p className="notice success">Diese Buchung ist bezahlt und kann nur noch durch Admins geändert werden.</p>
-      ) : (
-        <SubmitButton pendingLabel="Buchung wird gespeichert...">Buchung speichern</SubmitButton>
-      )}
+      {paymentPreview?.paid_amount_cents ? (
+        <p className="notice success">
+          Zahlung bisher: {bookingPaymentSummary(paymentPreview)} Änderungen werden mit deiner bestätigten Zahlung verrechnet.
+        </p>
+      ) : null}
+
+      <SubmitButton pendingLabel="Buchung wird gespeichert...">
+        {booking ? "Buchung ändern" : "Buchung speichern"}
+      </SubmitButton>
     </form>
   );
 }

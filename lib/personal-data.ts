@@ -5,6 +5,10 @@ const ENCRYPTION_PREFIX = "enc:v1";
 const PROFILE_FIRST_NAME_CONTEXT = "profiles.first_name";
 const PROFILE_LAST_NAME_CONTEXT = "profiles.last_name";
 const PROFILE_HOMETOWN_CONTEXT = "profiles.hometown";
+const PROFILE_STREET_ADDRESS_CONTEXT = "profiles.street_address";
+const PROFILE_POSTAL_CODE_CONTEXT = "profiles.postal_code";
+const PROFILE_CITY_CONTEXT = "profiles.city";
+const PROFILE_EXPECTED_ARRIVAL_CONTEXT = "profiles.expected_arrival_at";
 const BOOKING_BEER_REGION_CONTEXT = "bookings.beer_crate_region";
 const GALLERY_CAPTION_CONTEXT = "gallery_photos.caption";
 
@@ -79,22 +83,35 @@ function decryptText(value: string | null | undefined, context: string) {
   return Buffer.concat([decipher.update(fromBase64Url(ciphertextValue)), decipher.final()]).toString("utf8");
 }
 
-export function encryptProfileFields(input: Pick<ProfileRecord, "first_name" | "last_name" | "hometown">) {
+type ProfilePersonalFields = Pick<
+  ProfileRecord,
+  "first_name" | "last_name" | "hometown" | "street_address" | "postal_code" | "city" | "expected_arrival_at"
+>;
+
+export function encryptProfileFields(input: ProfilePersonalFields) {
   return {
     first_name: encryptText(input.first_name, PROFILE_FIRST_NAME_CONTEXT),
     last_name: encryptText(input.last_name, PROFILE_LAST_NAME_CONTEXT),
-    hometown: encryptText(input.hometown, PROFILE_HOMETOWN_CONTEXT)
+    hometown: encryptText(input.hometown, PROFILE_HOMETOWN_CONTEXT),
+    street_address: encryptText(input.street_address, PROFILE_STREET_ADDRESS_CONTEXT),
+    postal_code: encryptText(input.postal_code, PROFILE_POSTAL_CODE_CONTEXT),
+    city: encryptText(input.city, PROFILE_CITY_CONTEXT),
+    expected_arrival_at: encryptText(input.expected_arrival_at, PROFILE_EXPECTED_ARRIVAL_CONTEXT)
   };
 }
 
-export function decryptProfileFields<T extends Pick<ProfileRecord, "first_name" | "last_name" | "hometown"> | null>(profile: T): T {
+export function decryptProfileFields<T extends ProfilePersonalFields | null>(profile: T): T {
   if (!profile) return profile;
 
   return {
     ...profile,
     first_name: decryptText(profile.first_name, PROFILE_FIRST_NAME_CONTEXT),
     last_name: decryptText(profile.last_name, PROFILE_LAST_NAME_CONTEXT),
-    hometown: decryptText(profile.hometown, PROFILE_HOMETOWN_CONTEXT)
+    hometown: decryptText(profile.hometown, PROFILE_HOMETOWN_CONTEXT),
+    street_address: decryptText(profile.street_address, PROFILE_STREET_ADDRESS_CONTEXT),
+    postal_code: decryptText(profile.postal_code, PROFILE_POSTAL_CODE_CONTEXT),
+    city: decryptText(profile.city, PROFILE_CITY_CONTEXT),
+    expected_arrival_at: decryptText(profile.expected_arrival_at, PROFILE_EXPECTED_ARRIVAL_CONTEXT)
   };
 }
 

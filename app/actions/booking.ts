@@ -23,6 +23,7 @@ export async function submitBookingAction(formData: FormData) {
   const profile = await requireCompleteProfile(user.id);
 
   const eventId = text(formData, "eventId");
+  const bookingId = text(formData, "bookingId");
   const mode = text(formData, "mode") as BookingMode;
   const participantCount = int(formData, "participantCount");
   const beerCrateRegion = text(formData, "beerCrateRegion");
@@ -33,20 +34,23 @@ export async function submitBookingAction(formData: FormData) {
     .map((value) => (typeof value === "string" ? value.trim() : ""))
     .filter(Boolean);
 
-  if (!eventId || !["overnight", "day_guest"].includes(mode)) {
-    redirect("/book?error=Die Buchung ist unvollständig.");
-  }
+  const errorRedirectBase = bookingId ? "/book?bearbeiten=1&error=" : "/book?error=";
+  const redirectWithError = (message: string): never => redirect(`${errorRedirectBase}${encodeURIComponent(message)}`);
+
+  if (!eventId || !["overnight", "day_guest"].includes(mode)) redirectWithError("Die Buchung ist unvollständig.");
 
   if (participantCount < 1 || participantCount > 3) {
-    redirect("/book?error=Bitte gib an, ob du alleine, zu zweit oder zu dritt kommst.");
+    redirectWithError("Bitte gib an, ob du alleine, zu zweit oder zu dritt kommst.");
   }
 
-  let encryptedBeerCrateRegion: string | null;
+  let encryptedBeerCrateRegion: string | null = null;
   try {
     encryptedBeerCrateRegion = encryptBeerCrateRegion(beerCrateRegion);
   } catch (error) {
-    redirect(`/book?error=${encodeURIComponent(error instanceof Error ? error.message : "Verschlüsselung fehlgeschlagen.")}`);
+    redirectWithError(error instanceof Error ? error.message : "Verschlüsselung fehlgeschlagen.");
   }
+
+  if (encryptedBeerCrateRegion === null && beerCrateRegion) redirectWithError("Verschlüsselung fehlgeschlagen.");
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("upsert_booking_v2", {
@@ -59,7 +63,7 @@ export async function submitBookingAction(formData: FormData) {
     p_beer_crate_region: encryptedBeerCrateRegion
   });
 
-  if (error || !data) redirect(`/book?error=${encodeURIComponent(error?.message || "Buchung fehlgeschlagen.")}`);
+  if (error || !data) redirectWithError(error?.message || "Buchung fehlgeschlagen.");
 
   const booking = decryptBookingFields(data as BookingRecord);
   const { data: eventData } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();

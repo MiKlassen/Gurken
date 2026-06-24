@@ -74,7 +74,6 @@ const emailTemplateNames: Record<EmailTemplateKey, string> = {
 export async function saveEventAction(formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();
-  const locationUrl = optionalUrl(formData, "locationUrl");
 
   const eventId = text(formData, "eventId");
   const payload = {
@@ -86,14 +85,6 @@ export async function saveEventAction(formData: FormData) {
     starts_on: text(formData, "startsOn"),
     ends_on: text(formData, "endsOn"),
     public_summary: text(formData, "publicSummary"),
-    location_label: text(formData, "locationLabel"),
-    location_address: nullableText(formData, "locationAddress"),
-    location_url: locationUrl || null,
-    location_details: text(formData, "locationDetails"),
-    location_meta_label_1: nullableText(formData, "locationMetaLabel1"),
-    location_meta_value_1: nullableText(formData, "locationMetaValue1"),
-    location_meta_label_2: nullableText(formData, "locationMetaLabel2"),
-    location_meta_value_2: nullableText(formData, "locationMetaValue2"),
     member_limit: int(formData, "memberLimit"),
     overnight_price_cents: cents(formData, "overnightPrice"),
     day_guest_price_cents: cents(formData, "dayGuestPrice"),
@@ -104,10 +95,6 @@ export async function saveEventAction(formData: FormData) {
 
   if (!payload.year || !payload.name || !payload.subject || !payload.slug || !payload.starts_on || !payload.ends_on || !payload.member_limit) {
     redirect("/admin?bereich=event&error=Bitte alle Pflichtfelder für das Treffen ausfüllen.");
-  }
-
-  if (locationUrl === "") {
-    redirect("/admin?bereich=event&error=Bitte einen gültigen Ortslink mit http oder https angeben.");
   }
 
   const startsAt = dateValue(payload.starts_on);
@@ -135,8 +122,152 @@ export async function saveEventAction(formData: FormData) {
   revalidatePath("/dashboard");
   revalidatePath("/book");
   revalidatePath("/location");
+  revalidatePath("/event");
   revalidatePath("/admin");
   redirect("/admin?bereich=event&message=Treffen gespeichert.");
+}
+
+export async function saveLocationSettingsAction(formData: FormData) {
+  await requireAdmin();
+  const supabase = await createClient();
+  const eventId = text(formData, "eventId");
+  const locationUrl = optionalUrl(formData, "locationUrl");
+
+  if (!eventId) {
+    redirect("/admin?bereich=ort&error=Bitte zuerst ein Treffen anlegen.");
+  }
+
+  if (locationUrl === "") {
+    redirect("/admin?bereich=ort&error=Bitte einen gültigen Ortslink mit http oder https angeben.");
+  }
+
+  const payload = {
+    location_label: text(formData, "locationLabel") || "Ort nach Login",
+    location_address: nullableText(formData, "locationAddress"),
+    location_url: locationUrl || null,
+    location_details: text(formData, "locationDetails"),
+    location_meta_label_1: nullableText(formData, "locationMetaLabel1"),
+    location_meta_value_1: nullableText(formData, "locationMetaValue1"),
+    location_meta_label_2: nullableText(formData, "locationMetaLabel2"),
+    location_meta_value_2: nullableText(formData, "locationMetaValue2")
+  };
+
+  const { error } = await supabase.from("events").update(payload).eq("id", eventId);
+  if (error) redirect(`/admin?bereich=ort&error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  revalidatePath("/location");
+  revalidatePath("/event");
+  redirect("/admin?bereich=ort&message=Ortseinstellungen gespeichert.");
+}
+
+export async function saveRoomAction(formData: FormData) {
+  await requireAdmin();
+  const supabase = await createClient();
+  const eventId = text(formData, "eventId");
+  const roomId = text(formData, "roomId");
+  const name = text(formData, "roomName");
+
+  if (!eventId) {
+    redirect("/admin?bereich=ort&error=Bitte zuerst ein Treffen anlegen.");
+  }
+
+  if (!name) {
+    redirect("/admin?bereich=ort&error=Bitte einen Zimmernamen angeben.");
+  }
+
+  const payload = {
+    event_id: eventId,
+    name,
+    is_multi_bed: checkbox(formData, "isMultiBed"),
+    bed_count: boundedInt(formData, "bedCount", 1, 1, 100),
+    notes: nullableText(formData, "roomNotes"),
+    sort_order: boundedInt(formData, "sortOrder", 0, 0, 10_000)
+  };
+
+  const query = roomId
+    ? supabase
+        .from("event_rooms")
+        .update(payload)
+        .eq("id", roomId)
+        .eq("event_id", eventId)
+    : supabase.from("event_rooms").insert(payload);
+
+  const { error } = await query;
+  if (error) redirect(`/admin?bereich=ort&error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin");
+  revalidatePath("/event");
+  redirect("/admin?bereich=ort&message=Zimmer gespeichert.");
+}
+
+export async function deleteRoomAction(formData: FormData) {
+  await requireAdmin();
+  const supabase = await createClient();
+  const roomId = text(formData, "roomId");
+  const eventId = text(formData, "eventId");
+
+  if (!roomId || !eventId) {
+    redirect("/admin?bereich=ort&error=Zimmer fehlt.");
+  }
+
+  const { error } = await supabase.from("event_rooms").delete().eq("id", roomId).eq("event_id", eventId);
+  if (error) redirect(`/admin?bereich=ort&error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin");
+  revalidatePath("/event");
+  redirect("/admin?bereich=ort&message=Zimmer gelöscht.");
+}
+
+export async function saveRoomAssignmentAction(formData: FormData) {
+  const user = await requireAdmin();
+  const supabase = await createClient();
+  const bookingId = text(formData, "bookingId");
+  const roomId = text(formData, "roomId");
+
+  if (!bookingId) {
+    redirect("/event?error=Buchung fehlt.");
+  }
+
+  if (!roomId) {
+    const { error } = await supabase.from("event_room_assignments").delete().eq("booking_id", bookingId);
+    if (error) redirect(`/event?error=${encodeURIComponent(error.message)}`);
+
+    revalidatePath("/event");
+    redirect("/event?message=Zimmerzuteilung entfernt.");
+  }
+
+  const [{ data: booking, error: bookingError }, { data: room, error: roomError }] = await Promise.all([
+    supabase.from("bookings").select("id,event_id").eq("id", bookingId).single(),
+    supabase.from("event_rooms").select("id,event_id").eq("id", roomId).single()
+  ]);
+
+  if (bookingError || !booking) {
+    redirect(`/event?error=${encodeURIComponent(bookingError?.message || "Buchung nicht gefunden.")}`);
+  }
+
+  if (roomError || !room) {
+    redirect(`/event?error=${encodeURIComponent(roomError?.message || "Zimmer nicht gefunden.")}`);
+  }
+
+  if ((booking as { event_id: string }).event_id !== (room as { event_id: string }).event_id) {
+    redirect("/event?error=Zimmer und Buchung gehören nicht zum selben Event.");
+  }
+
+  const { error } = await supabase.from("event_room_assignments").upsert(
+    {
+      booking_id: bookingId,
+      room_id: roomId,
+      assigned_by: user.id
+    },
+    { onConflict: "booking_id" }
+  );
+
+  if (error) redirect(`/event?error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/event");
+  redirect("/event?message=Zimmerzuteilung gespeichert.");
 }
 
 export async function saveAppSettingsAction(formData: FormData) {
@@ -206,12 +337,26 @@ export async function updateBookingStatusAction(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("bookings").update({ status }).eq("id", bookingId);
+  let update: Partial<BookingRecord> = { status };
+
+  if (status === "paid") {
+    const { data: booking, error: bookingError } = await supabase.from("bookings").select("amount_cents").eq("id", bookingId).single();
+    if (bookingError || !booking) redirect(`/admin?bereich=buchungen&error=${encodeURIComponent(bookingError?.message || "Buchung nicht gefunden.")}`);
+
+    update = {
+      ...update,
+      paid_amount_cents: (booking as Pick<BookingRecord, "amount_cents">).amount_cents,
+      payment_confirmed_at: new Date().toISOString()
+    };
+  }
+
+  const { error } = await supabase.from("bookings").update(update).eq("id", bookingId);
 
   if (error) redirect(`/admin?bereich=buchungen&error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
+  revalidatePath("/book/confirmation");
   redirect("/admin?bereich=buchungen&message=Buchung aktualisiert.");
 }
 
@@ -224,12 +369,23 @@ export async function confirmBookingAction(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("bookings").update({ status: "paid" satisfies BookingStatus }).eq("id", bookingId);
+  const { data: booking, error: bookingError } = await supabase.from("bookings").select("amount_cents").eq("id", bookingId).single();
+  if (bookingError || !booking) redirect(`/admin?bereich=buchungen&error=${encodeURIComponent(bookingError?.message || "Buchung nicht gefunden.")}`);
+
+  const { error } = await supabase
+    .from("bookings")
+    .update({
+      status: "paid" satisfies BookingStatus,
+      paid_amount_cents: (booking as Pick<BookingRecord, "amount_cents">).amount_cents,
+      payment_confirmed_at: new Date().toISOString()
+    })
+    .eq("id", bookingId);
 
   if (error) redirect(`/admin?bereich=buchungen&error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
+  revalidatePath("/book/confirmation");
   redirect("/admin?bereich=buchungen&message=Buchung bestätigt.");
 }
 

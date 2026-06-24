@@ -3,17 +3,21 @@ import Link from "next/link";
 import {
   addAdminAction,
   confirmBookingAction,
+  deleteRoomAction,
   encryptExistingPersonalDataAction,
   promoteMemberToAdminAction,
   saveAppSettingsAction,
   saveEmailTemplatesAction,
   saveEventAction,
+  saveLocationSettingsAction,
+  saveRoomAction,
   updateBookingStatusAction
 } from "@/app/actions/admin";
 import { BrandHeader } from "@/components/brand-header";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/submit-button";
 import { getAppSettings, getSecretConfigStatus } from "@/lib/app-settings";
+import { bookingPaymentState } from "@/lib/booking-summary";
 import { demoEvent, getAdminOverview, requireAdmin } from "@/lib/data";
 import { getEmailTemplates, templatePlaceholderHelp } from "@/lib/email-templates";
 import { formatCurrency, formatDate, formatDateTime, formatParticipantCount } from "@/lib/format";
@@ -22,12 +26,13 @@ import type { BookingMode, BookingRecord, BookingStatus } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-type AdminSection = "buchungen" | "mitglieder" | "event" | "admins" | "mails" | "einstellungen";
+type AdminSection = "buchungen" | "mitglieder" | "event" | "ort" | "admins" | "mails" | "einstellungen";
 
 const adminSections: { id: AdminSection; label: string }[] = [
   { id: "buchungen", label: "Buchungen" },
   { id: "mitglieder", label: "Mitglieder" },
   { id: "event", label: "Event" },
+  { id: "ort", label: "Ortseinstellungen" },
   { id: "admins", label: "Admins" },
   { id: "mails", label: "E-Mails" },
   { id: "einstellungen", label: "Einstellungen" }
@@ -62,13 +67,17 @@ function bookingPeriod(booking: BookingRecord) {
   return (booking.day_guest_dates || []).map(formatDate).join(", ") || "offen";
 }
 
+function expectedArrival(value: string | null | undefined) {
+  return value ? formatDateTime(value) : "offen";
+}
+
 export default async function AdminPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdmin();
   const params = await searchParams;
   const activeSection = getAdminSection(params.bereich);
   const error = typeof params.error === "string" ? params.error : "";
   const message = typeof params.message === "string" ? params.message : "";
-  const [{ events, bookings, profiles, adminMemberships }, appSettings, mailTemplates] = await Promise.all([
+  const [{ events, bookings, profiles, adminMemberships, rooms }, appSettings, mailTemplates] = await Promise.all([
     getAdminOverview(),
     getAppSettings(),
     getEmailTemplates()
@@ -83,6 +92,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   const waitlistedBookings = bookings.filter((booking) => booking.status === "waitlisted");
   const bookingByUser = new Map(bookings.map((booking) => [booking.user_id, booking]));
   const adminUserIds = new Set(adminMemberships.map((membership) => membership.user_id));
+  const paidAmountTotal = bookings.reduce((sum, booking) => sum + (booking.paid_amount_cents || 0), 0);
+  const openBalanceTotal = bookings.reduce((sum, booking) => sum + bookingPaymentState(booking).remainingCents, 0);
+  const refundTotal = bookings.reduce((sum, booking) => sum + bookingPaymentState(booking).refundCents, 0);
+  const activeRooms = rooms.filter((room) => room.event_id === activeEvent.id);
+  const totalBeds = activeRooms.reduce((sum, room) => sum + room.bed_count, 0);
 
   return (
     <main className="app-shell admin-shell">
@@ -134,6 +148,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                 <th>Zeitraum</th>
                 <th>Bierkasten</th>
                 <th>Betrag</th>
+                <th>Bezahlt</th>
+                <th>Saldo</th>
                 <th>Status</th>
                 <th>Reminder</th>
                 <th>Eingang</th>
@@ -142,18 +158,35 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             </thead>
             <tbody>
               {bookings.length ? (
-                bookings.map((booking) => (
+                bookings.map((booking) => {
+                  const paymentState = bookingPaymentState(booking);
+
+                  return (
                   <tr key={booking.id}>
                     <td>
                       {booking.profiles?.first_name || "?"} {booking.profiles?.last_name || ""}
                       <br />
-                      <span>{booking.profiles?.hometown || "Wohnort offen"}</span>
+                      <span>
+                        {booking.profiles?.postal_code || ""} {booking.profiles?.city || booking.profiles?.hometown || "Anschrift offen"}
+                      </span>
                     </td>
                     <td>{bookingModeLabels[booking.mode]}</td>
                     <td>{formatParticipantCount(booking.participant_count)}</td>
                     <td>{bookingPeriod(booking)}</td>
                     <td>{booking.beer_crate_region || "offen"}</td>
                     <td>{formatCurrency(booking.amount_cents)}</td>
+                    <td>{booking.paid_amount_cents ? formatCurrency(booking.paid_amount_cents) : "-"}</td>
+                    <td>
+                      {paymentState.remainingCents ? (
+                        <span className="payment-balance payment-balance-due">{formatCurrency(paymentState.remainingCents)} offen</span>
+                      ) : paymentState.refundCents ? (
+                        <span className="payment-balance payment-balance-refund">
+                          {formatCurrency(paymentState.refundCents)} Guthaben
+                        </span>
+                      ) : (
+                        <span className="payment-balance payment-balance-ok">ausgeglichen</span>
+                      )}
+                    </td>
                     <td>
                       <StatusBadge status={booking.status} />
                     </td>
@@ -193,10 +226,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={10}>Noch keine Buchungen.</td>
+                  <td colSpan={12}>Noch keine Buchungen.</td>
                 </tr>
               )}
             </tbody>
@@ -222,7 +256,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Wohnort</th>
+                <th>Anschrift</th>
+                <th>Ankunft</th>
                 <th>Buchung</th>
                 <th>Personen</th>
                 <th>Status</th>
@@ -242,7 +277,16 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                       <td>
                         {profile.first_name || "?"} {profile.last_name || ""}
                       </td>
-                      <td>{profile.hometown || "offen"}</td>
+                      <td>
+                        {profile.street_address ? (
+                          <>
+                            {profile.street_address}
+                            <br />
+                          </>
+                        ) : null}
+                        {profile.postal_code || profile.city ? `${profile.postal_code || ""} ${profile.city || ""}`.trim() : profile.hometown || "offen"}
+                      </td>
+                      <td>{expectedArrival(profile.expected_arrival_at)}</td>
                       <td>{booking ? bookingModeLabels[booking.mode] : "Keine Buchung"}</td>
                       <td>{booking ? formatParticipantCount(booking.participant_count) : "-"}</td>
                       <td>{booking ? <StatusBadge status={booking.status} /> : "-"}</td>
@@ -269,7 +313,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                 })
               ) : (
                 <tr>
-                  <td colSpan={8}>Noch keine Mitgliederprofile.</td>
+                  <td colSpan={9}>Noch keine Mitgliederprofile.</td>
                 </tr>
               )}
             </tbody>
@@ -345,6 +389,39 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             Landingpage-Text
             <textarea name="publicSummary" defaultValue={activeEvent.public_summary} rows={3} />
           </label>
+          <div className="form-grid two">
+            <label>
+              IBAN
+              <input name="paymentIban" defaultValue={activeEvent.payment_iban || ""} />
+            </label>
+            <label>
+              PayPal.me
+              <input name="paymentPaypalUrl" defaultValue={activeEvent.payment_paypal_url || ""} />
+            </label>
+          </div>
+          <label>
+            Zahlungshinweis
+            <textarea name="paymentNote" defaultValue={activeEvent.payment_note || ""} rows={2} />
+          </label>
+          <SubmitButton>Treffen speichern</SubmitButton>
+        </form>
+      </section>
+      ) : null}
+
+      {activeSection === "ort" ? (
+      <section className="admin-grid admin-grid-single">
+        <form className="form-panel admin-form" action={saveLocationSettingsAction}>
+          <div className="section-title-row">
+            <div>
+              <h2>Ortseinstellungen</h2>
+              <p className="form-hint">Adresse, Ortslink, genaue Hinweise und Zusatzfelder für den Mitgliederbereich.</p>
+            </div>
+            <div className="admin-metrics" aria-label="Zimmerkennzahlen">
+              <span>{activeRooms.length} Zimmer</span>
+              <span>{totalBeds} Betten</span>
+            </div>
+          </div>
+          <input type="hidden" name="eventId" value={activeEvent.id !== "demo" ? activeEvent.id : ""} />
           <label>
             Ortslabel
             <input name="locationLabel" defaultValue={activeEvent.location_label} />
@@ -379,22 +456,92 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
               <input name="locationMetaValue2" defaultValue={activeEvent.location_meta_value_2 || ""} placeholder="z.B. Bahnhof 12 Minuten entfernt" />
             </label>
           </div>
-          <div className="form-grid two">
-            <label>
-              IBAN
-              <input name="paymentIban" defaultValue={activeEvent.payment_iban || ""} />
-            </label>
-            <label>
-              PayPal.me
-              <input name="paymentPaypalUrl" defaultValue={activeEvent.payment_paypal_url || ""} />
-            </label>
-          </div>
-          <label>
-            Zahlungshinweis
-            <textarea name="paymentNote" defaultValue={activeEvent.payment_note || ""} rows={2} />
-          </label>
-          <SubmitButton>Treffen speichern</SubmitButton>
+          <SubmitButton>Ort speichern</SubmitButton>
         </form>
+
+        <section className="panel room-management">
+          <div className="section-title-row">
+            <div>
+              <h2>Zimmer</h2>
+              <p className="small-text">Zimmer und Betten bilden die Grundlage für den Zimmerbelegungsplan.</p>
+            </div>
+          </div>
+          <form className="room-create-form" action={saveRoomAction}>
+            <input type="hidden" name="eventId" value={activeEvent.id !== "demo" ? activeEvent.id : ""} />
+            <div className="form-grid three">
+              <label>
+                Zimmername
+                <input name="roomName" placeholder="z.B. Dachzimmer" required />
+              </label>
+              <label>
+                Betten
+                <input name="bedCount" type="number" min={1} max={100} defaultValue={1} required />
+              </label>
+              <label>
+                Sortierung
+                <input name="sortOrder" type="number" min={0} max={10000} defaultValue={activeRooms.length * 10} />
+              </label>
+            </div>
+            <div className="form-grid two">
+              <label>
+                Notiz
+                <input name="roomNotes" placeholder="z.B. ruhig, Obergeschoss, eigenes Bad" />
+              </label>
+              <label className="checkbox-line">
+                <input name="isMultiBed" type="checkbox" defaultChecked /> Mehrbettzimmer
+              </label>
+            </div>
+            <SubmitButton className="button secondary">Zimmer anlegen</SubmitButton>
+          </form>
+
+          {activeRooms.length ? (
+            <div className="room-card-grid">
+              {activeRooms.map((room) => (
+                <article className="room-card" key={room.id}>
+                  <form className="room-card-form" action={saveRoomAction}>
+                    <input type="hidden" name="eventId" value={activeEvent.id} />
+                    <input type="hidden" name="roomId" value={room.id} />
+                    <div className="form-grid two">
+                      <label>
+                        Zimmername
+                        <input name="roomName" defaultValue={room.name} required />
+                      </label>
+                      <label>
+                        Betten
+                        <input name="bedCount" type="number" min={1} max={100} defaultValue={room.bed_count} required />
+                      </label>
+                      <label>
+                        Sortierung
+                        <input name="sortOrder" type="number" min={0} max={10000} defaultValue={room.sort_order} />
+                      </label>
+                      <label className="checkbox-line">
+                        <input name="isMultiBed" type="checkbox" defaultChecked={room.is_multi_bed} /> Mehrbettzimmer
+                      </label>
+                    </div>
+                    <label>
+                      Notiz
+                      <textarea name="roomNotes" defaultValue={room.notes || ""} rows={2} />
+                    </label>
+                    <div className="room-card-actions">
+                      <SubmitButton className="button secondary small" pendingLabel="Speichert...">
+                        Speichern
+                      </SubmitButton>
+                    </div>
+                  </form>
+                  <form action={deleteRoomAction}>
+                    <input type="hidden" name="eventId" value={activeEvent.id} />
+                    <input type="hidden" name="roomId" value={room.id} />
+                    <SubmitButton className="button ghost small" pendingLabel="Löscht...">
+                      Zimmer löschen
+                    </SubmitButton>
+                  </form>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="notice-inline">Noch keine Zimmer angelegt.</p>
+          )}
+        </section>
       </section>
       ) : null}
 
@@ -420,7 +567,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             {occupiedSlots} von {activeEvent.member_limit}
           </p>
           <h2>Umsatz-Snapshot</h2>
-          <p>{formatCurrency(bookings.filter((booking) => booking.status === "paid").reduce((sum, booking) => sum + booking.amount_cents, 0))}</p>
+          <p>{formatCurrency(paidAmountTotal)} bestätigt bezahlt</p>
+          <p className="small-text">{formatCurrency(openBalanceTotal)} offen</p>
+          <p className="small-text">{formatCurrency(refundTotal)} Guthaben / Rückerstattung</p>
         </div>
       </section>
       ) : null}

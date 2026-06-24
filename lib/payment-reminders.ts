@@ -13,7 +13,10 @@ type ReminderEvent = Pick<
 >;
 
 type ReminderBooking = BookingRecord & {
-  profiles: Pick<ProfileRecord, "first_name" | "last_name" | "hometown"> | null;
+  profiles: Pick<
+    ProfileRecord,
+    "first_name" | "last_name" | "hometown" | "street_address" | "postal_code" | "city" | "expected_arrival_at"
+  > | null;
   events: ReminderEvent | null;
 };
 
@@ -35,7 +38,11 @@ function reminderProfile(profile?: ProfileRecord | null) {
   return {
     first_name: profile.first_name,
     last_name: profile.last_name,
-    hometown: profile.hometown
+    hometown: profile.hometown,
+    street_address: profile.street_address,
+    postal_code: profile.postal_code,
+    city: profile.city,
+    expected_arrival_at: profile.expected_arrival_at
   };
 }
 

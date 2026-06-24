@@ -4,7 +4,7 @@ import { saveProfileAction } from "@/app/actions/profile";
 import { BrandHeader } from "@/components/brand-header";
 import { InstallAppPrompt } from "@/components/install-app-prompt";
 import { SubmitButton } from "@/components/submit-button";
-import { getCurrentProfile, getIsAdmin, isProfileComplete, requireVerifiedUser } from "@/lib/data";
+import { getActiveEventForMember, getCurrentProfile, getIsAdmin, isProfileComplete, requireVerifiedUser } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -12,8 +12,15 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function OnboardingPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireVerifiedUser();
-  const [profile, isAdmin, params] = await Promise.all([getCurrentProfile(user.id), getIsAdmin(user.id, user.email), searchParams]);
+  const [profile, isAdmin, event, params] = await Promise.all([
+    getCurrentProfile(user.id),
+    getIsAdmin(user.id, user.email),
+    getActiveEventForMember(),
+    searchParams
+  ]);
   const error = typeof params.error === "string" ? params.error : "";
+  const minArrival = event ? `${event.starts_on}T00:00` : undefined;
+  const maxArrival = event ? `${event.ends_on}T23:59` : undefined;
 
   return (
     <main className="app-shell">
@@ -29,7 +36,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
       {isProfileComplete(profile) ? <p className="notice success">Dein Profil ist vollständig.</p> : null}
       <InstallAppPrompt />
       <form className="form-panel wide" action={saveProfileAction}>
-        <div className="form-grid three">
+        <div className="form-grid two">
           <label>
             Vorname
             <input name="firstName" defaultValue={profile?.first_name || ""} required />
@@ -38,11 +45,58 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
             Name
             <input name="lastName" defaultValue={profile?.last_name || ""} required />
           </label>
-          <label>
-            Wohnort
-            <input name="hometown" defaultValue={profile?.hometown || ""} required />
-          </label>
         </div>
+        <fieldset className="address-fieldset">
+          <legend>Anschrift</legend>
+          <div className="form-grid address-grid">
+            <label>
+              Straße und Hausnummer
+              <input
+                name="streetAddress"
+                autoComplete="street-address"
+                defaultValue={profile?.street_address || ""}
+                placeholder="z.B. Bonhoefferstraße 42"
+                required
+              />
+            </label>
+            <label>
+              PLZ
+              <input
+                name="postalCode"
+                autoComplete="postal-code"
+                inputMode="numeric"
+                defaultValue={profile?.postal_code || ""}
+                placeholder="58739"
+                required
+              />
+            </label>
+            <label>
+              Ort
+              <input
+                name="city"
+                autoComplete="address-level2"
+                defaultValue={profile?.city || profile?.hometown || ""}
+                placeholder="Wickede"
+                required
+              />
+            </label>
+          </div>
+        </fieldset>
+        <fieldset className="address-fieldset">
+          <legend>Anreise</legend>
+          <label>
+            Wann kommst du ungefähr an?
+            <input
+              name="expectedArrivalAt"
+              type="datetime-local"
+              min={minArrival}
+              max={maxArrival}
+              defaultValue={profile?.expected_arrival_at || ""}
+              required
+            />
+          </label>
+          <p className="form-hint">Ungefähr reicht. Du kannst die Angabe später hier ändern.</p>
+        </fieldset>
         <SubmitButton>Profil speichern</SubmitButton>
         <p className="legal-note">
           Wir nutzen diese Angaben nur für Planung, Buchung und Mitgliederbereich. Details stehen in der{" "}

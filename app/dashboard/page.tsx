@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Beer, CalendarDays, Euro, Images, MapPin } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
 import { StatusBadge } from "@/components/status-badge";
+import { bookingPaymentState, bookingPaymentSummary } from "@/lib/booking-summary";
 import {
   getActiveEventForMember,
   getBookingForUser,
@@ -28,6 +29,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const [params, isAdmin, event] = await Promise.all([searchParams, getIsAdmin(user.id, user.email), getActiveEventForMember()]);
   const message = typeof params.message === "string" ? params.message : "";
   const booking = event ? await getBookingForUser(event.id, user.id) : null;
+  const paymentState = booking ? bookingPaymentState(booking) : null;
 
   return (
     <main className="app-shell">
@@ -75,7 +77,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
                 <p>
                   <StatusBadge status={booking.status} /> {formatCurrency(booking.amount_cents)}
                 </p>
-                {booking.status !== "paid" ? (
+                <p className="small-text">{bookingPaymentSummary(booking)}</p>
+                {paymentState?.refundCents ? (
+                  <p className="payment-balance payment-balance-refund">
+                    Guthaben / Rückerstattung: {formatCurrency(paymentState.refundCents)}
+                  </p>
+                ) : null}
+                {paymentState?.remainingCents ? (
+                  <p className="payment-balance payment-balance-due">Noch offen: {formatCurrency(paymentState.remainingCents)}</p>
+                ) : null}
+                {paymentState?.remainingCents ? (
                   <div className="payment-box">
                     {event.payment_iban ? <p>IBAN: {event.payment_iban}</p> : null}
                     {event.payment_paypal_url ? (

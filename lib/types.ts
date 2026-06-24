@@ -24,11 +24,37 @@ export type EventRecord = {
   payment_note: string | null;
 };
 
+export type EventRoomRecord = {
+  id: string;
+  event_id: string;
+  name: string;
+  is_multi_bed: boolean;
+  bed_count: number;
+  notes: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EventRoomAssignmentRecord = {
+  id: string;
+  room_id: string;
+  booking_id: string;
+  assigned_by: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ProfileRecord = {
   user_id: string;
   first_name: string | null;
   last_name: string | null;
   hometown: string | null;
+  street_address: string | null;
+  postal_code: string | null;
+  city: string | null;
+  expected_arrival_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -52,6 +78,8 @@ export type BookingRecord = {
   day_guest_dates: string[] | null;
   participant_count: number;
   amount_cents: number;
+  paid_amount_cents: number;
+  payment_confirmed_at: string | null;
   status: BookingStatus;
   beer_crate_region: string | null;
   payment_reminder_sent_at: string | null;
@@ -70,7 +98,10 @@ export type GalleryPhoto = {
 };
 
 export type BookingWithProfile = BookingRecord & {
-  profiles: Pick<ProfileRecord, "first_name" | "last_name" | "hometown"> | null;
+  profiles: Pick<
+    ProfileRecord,
+    "first_name" | "last_name" | "hometown" | "street_address" | "postal_code" | "city" | "expected_arrival_at"
+  > | null;
 };
 
 export type AppSettingRecord = {

@@ -71,7 +71,7 @@ export default async function HomePage() {
         <div>
           <h2>Was nach dem Login passiert</h2>
           <p>
-            Nach Mailverifizierung führt dich das Onboarding durch Name, Vorname und Wohnort. Danach siehst du den
+            Nach Mailverifizierung führt dich das Onboarding durch Name, Vorname und Anschrift. Danach siehst du den
             genauen Ort, deine Zahlungsinfos und den Mitgliederbereich.
           </p>
         </div>

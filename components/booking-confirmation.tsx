@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Beer, CalendarDays, Euro, MapPin, ReceiptText, Users } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
-import { beerCrateLabel, bookingModeLabels, bookingPeriod, paymentLines } from "@/lib/booking-summary";
+import { beerCrateLabel, bookingModeLabels, bookingPaymentState, bookingPaymentSummary, bookingPeriod, paymentLines } from "@/lib/booking-summary";
 import { formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
 import type { BookingRecord, EventRecord, ProfileRecord } from "@/lib/types";
 
@@ -15,6 +15,7 @@ export function BookingConfirmation({
   profile: ProfileRecord | null;
 }) {
   const payment = paymentLines(event);
+  const paymentState = bookingPaymentState(booking);
 
   return (
     <section className="booking-confirmation">
@@ -52,7 +53,15 @@ export function BookingConfirmation({
           <Euro />
           <h2>Betrag</h2>
           <p className="confirmation-amount">{formatCurrency(booking.amount_cents)}</p>
-          <p className="small-text">Zahlung offline nach den untenstehenden Daten.</p>
+          <p className="small-text">{bookingPaymentSummary(booking)}</p>
+          {paymentState.remainingCents > 0 ? (
+            <p className="payment-balance payment-balance-due">Noch offen: {formatCurrency(paymentState.remainingCents)}</p>
+          ) : null}
+          {paymentState.refundCents > 0 ? (
+            <p className="payment-balance payment-balance-refund">
+              Rückerstattung / Guthaben: {formatCurrency(paymentState.refundCents)}
+            </p>
+          ) : null}
         </article>
       </div>
 
@@ -60,7 +69,7 @@ export function BookingConfirmation({
         <article className="panel">
           <ReceiptText />
           <h2>Zahlungsdaten</h2>
-          {payment.length ? (
+          {paymentState.remainingCents > 0 && payment.length ? (
             <div className="payment-list">
               {event.payment_iban ? <p>IBAN: {event.payment_iban}</p> : null}
               {event.payment_paypal_url ? (
@@ -70,6 +79,10 @@ export function BookingConfirmation({
               ) : null}
               {event.payment_note ? <p>{event.payment_note}</p> : null}
             </div>
+          ) : paymentState.refundCents > 0 ? (
+            <p>Du hast mehr bezahlt als die aktuelle Buchung kostet. Der Betrag wird im Adminbereich als Guthaben sichtbar.</p>
+          ) : booking.status === "paid" ? (
+            <p>Die Zahlung ist vollständig verbucht.</p>
           ) : (
             <p>Die Zahlungsdaten findest du im Mitgliederbereich.</p>
           )}
@@ -87,6 +100,9 @@ export function BookingConfirmation({
       </div>
 
       <div className="quick-actions confirmation-actions">
+        <Link className="button secondary" href="/book?bearbeiten=1">
+          Buchung ändern
+        </Link>
         <Link className="button primary" href="/dashboard">
           Zum Mitgliederbereich
         </Link>

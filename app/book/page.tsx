@@ -13,9 +13,10 @@ export default async function BookPage({ searchParams }: { searchParams: SearchP
   await requireCompleteProfile(user.id);
   const [params, isAdmin, event] = await Promise.all([searchParams, getIsAdmin(user.id, user.email), getActiveEventForMember()]);
   const error = typeof params.error === "string" ? params.error : "";
+  const editing = params.bearbeiten === "1";
   const booking = event ? await getBookingForUser(event.id, user.id) : null;
 
-  if (event && booking) redirect("/book/confirmation");
+  if (event && booking && !editing) redirect("/book/confirmation");
 
   return (
     <main className="app-shell">
@@ -24,7 +25,11 @@ export default async function BookPage({ searchParams }: { searchParams: SearchP
         <CalendarDays size={34} />
         <div>
           <h1>Buchung</h1>
-          <p>Zeitraum oder Tagesgast wählen, Betrag sehen, absenden und danach offline bezahlen.</p>
+          <p>
+            {booking
+              ? "Zeitraum, Personen oder Bierkastenregion ändern. Zahlungsdifferenzen bleiben für Admins sichtbar."
+              : "Zeitraum oder Tagesgast wählen, Betrag sehen, absenden und danach offline bezahlen."}
+          </p>
         </div>
       </section>
       {error ? <p className="notice error">{error}</p> : null}

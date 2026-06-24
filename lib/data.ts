@@ -3,7 +3,16 @@ import { hasSupabaseEnv, getInitialAdminEmails } from "@/lib/env";
 import { decryptBookingFields, decryptGalleryPhoto, decryptProfileFields } from "@/lib/personal-data";
 import { createAdminClient, hasServiceRoleKey } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { AdminMembershipRecord, BookingRecord, BookingWithProfile, EventRecord, GalleryPhoto, ProfileRecord } from "@/lib/types";
+import type {
+  AdminMembershipRecord,
+  BookingRecord,
+  BookingWithProfile,
+  EventRecord,
+  EventRoomAssignmentRecord,
+  EventRoomRecord,
+  GalleryPhoto,
+  ProfileRecord
+} from "@/lib/types";
 
 export const demoEvent: EventRecord = {
   id: "demo",
@@ -32,7 +41,14 @@ export const demoEvent: EventRecord = {
 };
 
 export function isProfileComplete(profile: ProfileRecord | null) {
-  return Boolean(profile?.first_name && profile.last_name && profile.hometown);
+  return Boolean(
+    profile?.first_name &&
+      profile.last_name &&
+      profile.street_address &&
+      profile.postal_code &&
+      profile.city &&
+      profile.expected_arrival_at
+  );
 }
 
 function bookingProfile(profile?: ProfileRecord | null) {
@@ -40,7 +56,11 @@ function bookingProfile(profile?: ProfileRecord | null) {
   return {
     first_name: profile.first_name,
     last_name: profile.last_name,
-    hometown: profile.hometown
+    hometown: profile.hometown,
+    street_address: profile.street_address,
+    postal_code: profile.postal_code,
+    city: profile.city,
+    expected_arrival_at: profile.expected_arrival_at
   };
 }
 
@@ -162,11 +182,13 @@ export async function getIsAdmin(userId: string, email?: string | null) {
 export async function getAdminOverview() {
   const supabase = await createClient();
 
-  const [events, profiles, bookings, adminMemberships] = await Promise.all([
+  const [events, profiles, bookings, adminMemberships, rooms, roomAssignments] = await Promise.all([
     supabase.from("events").select("*").order("starts_on", { ascending: false }),
     supabase.from("profiles").select("*").order("created_at", { ascending: false }),
     supabase.from("bookings").select("*").order("created_at", { ascending: false }),
-    supabase.from("admin_memberships").select("*").order("created_at", { ascending: false })
+    supabase.from("admin_memberships").select("*").order("created_at", { ascending: false }),
+    supabase.from("event_rooms").select("*").order("sort_order", { ascending: true }).order("name", { ascending: true }),
+    supabase.from("event_room_assignments").select("*").order("created_at", { ascending: true })
   ]);
 
   const decryptedProfiles = ((profiles.data || []) as ProfileRecord[]).map(decryptProfileFields);
@@ -182,6 +204,8 @@ export async function getAdminOverview() {
     events: (events.data || []) as EventRecord[],
     profiles: decryptedProfiles,
     bookings: bookingsWithProfiles,
-    adminMemberships: (adminMemberships.data || []) as AdminMembershipRecord[]
+    adminMemberships: (adminMemberships.data || []) as AdminMembershipRecord[],
+    rooms: (rooms.data || []) as EventRoomRecord[],
+    roomAssignments: (roomAssignments.data || []) as EventRoomAssignmentRecord[]
   };
 }

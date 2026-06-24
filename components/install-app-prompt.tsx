@@ -97,7 +97,7 @@ export function InstallAppPrompt() {
       </div>
       <div className="install-panel-note">
         <Share2 size={18} aria-hidden="true" />
-        <span>Nach der Installation: Fotos markieren, Teilen öffnen, Gurken auswählen.</span>
+        <span>Nach der Installation: Fotos markieren, Teilen öffnen, Gurken auswählen. Bei älteren Installationen App entfernen und neu installieren.</span>
       </div>
     </section>
   );

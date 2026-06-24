@@ -22,6 +22,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "Bierkastenpflicht: {{beerCrates}}\n" +
       "Bierkasten-Region: {{beerCrateRegion}}\n" +
       "Betrag: {{amount}}\n" +
+      "Zahlungsstand: {{paymentBalance}}\n" +
       "Status: {{status}}\n\n" +
       "Zahlungsdaten:\n{{paymentLines}}\n\n" +
       "Deine Buchungsbestätigung findest du hier:\n{{confirmationUrl}}\n",
@@ -35,6 +36,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "<tr><td>Bierkastenpflicht</td><td>{{beerCrates}}</td></tr>" +
       "<tr><td>Bierkasten-Region</td><td>{{beerCrateRegion}}</td></tr>" +
       "<tr><td>Betrag</td><td><strong>{{amount}}</strong></td></tr>" +
+      "<tr><td>Zahlungsstand</td><td>{{paymentBalance}}</td></tr>" +
       "<tr><td>Status</td><td>{{status}}</td></tr>" +
       "</table>" +
       "<p><strong>Zahlungsdaten</strong><br>{{paymentHtml}}</p>" +
@@ -54,6 +56,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "Personen: {{participantCount}}\n" +
       "Bierkastenpflicht: {{beerCrates}}\n" +
       "Betrag: {{amount}}\n\n" +
+      "Zahlungsstand: {{paymentBalance}}\n\n" +
       "Zahlungsdaten:\n{{paymentLines}}\n\n" +
       "Sobald ein Admin deine Zahlung als bezahlt markiert hat, bekommst du keine Reminder mehr.\n" +
       "{{dashboardUrl}}",
@@ -66,6 +69,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "<tr><td>Personen</td><td>{{participantCount}}</td></tr>" +
       "<tr><td>Bierkastenpflicht</td><td>{{beerCrates}}</td></tr>" +
       "<tr><td>Betrag</td><td><strong>{{amount}}</strong></td></tr>" +
+      "<tr><td>Zahlungsstand</td><td>{{paymentBalance}}</td></tr>" +
       "</table>" +
       "<p><strong>Zahlungsdaten</strong><br>{{paymentHtml}}</p>" +
       "<p>Sobald ein Admin deine Zahlung als bezahlt markiert hat, bekommst du keine Reminder mehr.</p>" +
@@ -86,6 +90,10 @@ export const templatePlaceholderHelp = [
   "beerCrates",
   "beerCrateRegion",
   "amount",
+  "paidAmount",
+  "remainingAmount",
+  "refundAmount",
+  "paymentBalance",
   "status",
   "paymentLines",
   "paymentHtml",

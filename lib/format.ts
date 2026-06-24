@@ -26,7 +26,7 @@ export function formatDateTime(date: string | null | undefined) {
 }
 
 export function formatParticipantCount(count: number | null | undefined) {
-  const normalized = count || 1;
+  const normalized = count ?? 1;
   return normalized === 1 ? "1 Person" : `${normalized} Personen`;
 }
 
