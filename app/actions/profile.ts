@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { requireVerifiedUser } from "@/lib/data";
+import { encryptProfileFields } from "@/lib/personal-data";
 import { createClient } from "@/lib/supabase/server";
 
 function text(formData: FormData, key: string) {
@@ -19,13 +20,22 @@ export async function saveProfileAction(formData: FormData) {
     redirect("/onboarding?error=Bitte Vorname, Name und Wohnort ausfüllen.");
   }
 
+  let encryptedProfile;
+  try {
+    encryptedProfile = encryptProfileFields({
+      first_name: firstName,
+      last_name: lastName,
+      hometown
+    });
+  } catch (error) {
+    redirect(`/onboarding?error=${encodeURIComponent(error instanceof Error ? error.message : "Verschlüsselung fehlgeschlagen.")}`);
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").upsert(
     {
       user_id: user.id,
-      first_name: firstName,
-      last_name: lastName,
-      hometown
+      ...encryptedProfile
     },
     { onConflict: "user_id" }
   );

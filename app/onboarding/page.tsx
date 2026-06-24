@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { UserRoundCheck } from "lucide-react";
 import { saveProfileAction } from "@/app/actions/profile";
 import { BrandHeader } from "@/components/brand-header";
+import { InstallAppPrompt } from "@/components/install-app-prompt";
 import { SubmitButton } from "@/components/submit-button";
-import { getCurrentProfile, isProfileComplete, requireVerifiedUser } from "@/lib/data";
+import { getCurrentProfile, getIsAdmin, isProfileComplete, requireVerifiedUser } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -10,13 +12,12 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function OnboardingPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireVerifiedUser();
-  const profile = await getCurrentProfile(user.id);
-  const params = await searchParams;
+  const [profile, isAdmin, params] = await Promise.all([getCurrentProfile(user.id), getIsAdmin(user.id, user.email), searchParams]);
   const error = typeof params.error === "string" ? params.error : "";
 
   return (
     <main className="app-shell">
-      <BrandHeader isAuthed />
+      <BrandHeader isAuthed isAdmin={isAdmin} />
       <section className="page-heading">
         <UserRoundCheck size={34} />
         <div>
@@ -26,6 +27,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
       </section>
       {error ? <p className="notice error">{error}</p> : null}
       {isProfileComplete(profile) ? <p className="notice success">Dein Profil ist vollständig.</p> : null}
+      <InstallAppPrompt />
       <form className="form-panel wide" action={saveProfileAction}>
         <div className="form-grid three">
           <label>
@@ -42,6 +44,10 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
           </label>
         </div>
         <SubmitButton>Profil speichern</SubmitButton>
+        <p className="legal-note">
+          Wir nutzen diese Angaben nur für Planung, Buchung und Mitgliederbereich. Details stehen in der{" "}
+          <Link href="/datenschutz">Datenschutzerklärung</Link>.
+        </p>
       </form>
     </main>
   );

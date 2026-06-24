@@ -15,7 +15,7 @@ export default async function HomePage() {
 
       <section className="hero-section">
         <div className="hero-copy">
-          <h1>Stimme-Stämme Treffen {event.year}</h1>
+          <h1>{event.subject || `${event.name} ${event.year}`}</h1>
           <p>{event.public_summary}</p>
           <div className="hero-actions">
             <Link className="button primary" href="/auth/register">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Beer, CalendarDays, Images, ShieldCheck, Sprout } from "lucide-react";
+import { Beer, CalendarDays, FileText, Images, MapPin, ShieldCheck, Sprout } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 
 type BrandHeaderProps = {
@@ -23,6 +23,9 @@ export function BrandHeader({ isAuthed = false, isAdmin = false }: BrandHeaderPr
             <Link href="/book">
               <CalendarDays size={18} /> Buchung
             </Link>
+            <Link href="/location">
+              <MapPin size={18} /> Ort
+            </Link>
             <Link href="/gallery">
               <Images size={18} /> Galerie
             </Link>
@@ -31,6 +34,9 @@ export function BrandHeader({ isAuthed = false, isAdmin = false }: BrandHeaderPr
                 <ShieldCheck size={18} /> Admin
               </Link>
             ) : null}
+            <Link href="/datenschutz">
+              <FileText size={18} /> Datenschutz
+            </Link>
             <form action={signOutAction}>
               <button className="button ghost" type="submit">
                 Logout
@@ -39,6 +45,9 @@ export function BrandHeader({ isAuthed = false, isAdmin = false }: BrandHeaderPr
           </>
         ) : (
           <>
+            <Link href="/datenschutz">
+              <FileText size={18} /> Datenschutz
+            </Link>
             <Link href="/auth/login">Login</Link>
             <Link className="button small primary" href="/auth/register">
               <Beer size={16} /> Registrieren

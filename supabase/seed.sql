@@ -1,6 +1,7 @@
 insert into public.events (
   year,
   name,
+  subject,
   slug,
   is_active,
   starts_on,
@@ -17,6 +18,7 @@ insert into public.events (
 )
 values (
   2026,
+  'Stimme-Stämme Treffen',
   'Stimme-Stämme Treffen 2026',
   'stimme-staemme-2026',
   true,
@@ -34,6 +36,7 @@ values (
 )
 on conflict (slug) do update
 set is_active = excluded.is_active,
+    subject = excluded.subject,
     starts_on = excluded.starts_on,
     ends_on = excluded.ends_on,
     public_summary = excluded.public_summary,

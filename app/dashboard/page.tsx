@@ -6,11 +6,12 @@ import {
   getActiveEventForMember,
   getBookingForUser,
   getCurrentProfile,
+  getIsAdmin,
   isProfileComplete,
   requireCompleteProfile,
   requireVerifiedUser
 } from "@/lib/data";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -23,19 +24,18 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     await requireCompleteProfile(user.id);
   }
 
-  const params = await searchParams;
+  const [params, isAdmin, event] = await Promise.all([searchParams, getIsAdmin(user.id, user.email), getActiveEventForMember()]);
   const message = typeof params.message === "string" ? params.message : "";
-  const event = await getActiveEventForMember();
   const booking = event ? await getBookingForUser(event.id, user.id) : null;
 
   return (
     <main className="app-shell">
-      <BrandHeader isAuthed />
+      <BrandHeader isAuthed isAdmin={isAdmin} />
       {message ? <p className="notice success">{message}</p> : null}
       <section className="dashboard-hero">
         <div>
           <p className="muted">Willkommen, {profile?.first_name}</p>
-          <h1>{event?.name || "Kein aktives Treffen"}</h1>
+          <h1>{event?.subject || event?.name || "Kein aktives Treffen"}</h1>
           <p>{event?.public_summary}</p>
         </div>
         <img src="/assets/gurken-rudel.png" alt="" />
@@ -54,11 +54,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             <MapPin />
             <h2>Ort</h2>
             <p>{event.location_label}</p>
+            {event.location_address ? <p className="small-text">{event.location_address}</p> : null}
             <p className="small-text">{event.location_details}</p>
+            <Link className="button secondary small panel-action" href="/location">
+              Ort ansehen
+            </Link>
           </article>
           <article className="panel">
             <Beer />
             <h2>Bierkastenpflicht</h2>
+            {booking ? <p>{formatParticipantCount(booking.participant_count)}</p> : null}
             <p>{booking?.beer_crate_region ? `Deine Region: ${booking.beer_crate_region}` : "Region noch offen."}</p>
           </article>
           <article className="panel">
@@ -91,6 +96,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
       <section className="quick-actions">
         <Link className="button primary" href="/book">
           <CalendarDays size={18} /> Buchung bearbeiten
+        </Link>
+        <Link className="button secondary" href="/location">
+          <MapPin size={18} /> Ort ansehen
         </Link>
         <Link className="button secondary" href="/gallery">
           <Images size={18} /> Galerie öffnen

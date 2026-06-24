@@ -5,7 +5,7 @@ import { Beer, CalendarCheck, Moon } from "lucide-react";
 import { submitBookingAction } from "@/app/actions/booking";
 import { SubmitButton } from "@/components/submit-button";
 import { calculateBookingAmount } from "@/lib/booking";
-import { datesBetween, formatCurrency, formatDate } from "@/lib/format";
+import { datesBetween, formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
 import type { BookingMode, BookingRecord, EventRecord } from "@/lib/types";
 
 export function BookingForm({ event, booking }: { event: EventRecord; booking: BookingRecord | null }) {
@@ -13,9 +13,10 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
   const [arrivalDate, setArrivalDate] = useState(booking?.arrival_date || event.starts_on);
   const [departureDate, setDepartureDate] = useState(booking?.departure_date || event.ends_on);
   const [dayGuestDates, setDayGuestDates] = useState<string[]>(booking?.day_guest_dates || [event.starts_on]);
+  const [participantCount, setParticipantCount] = useState(booking?.participant_count || 1);
   const locked = booking?.status === "paid";
   const eventDays = useMemo(() => datesBetween(event.starts_on, event.ends_on), [event.starts_on, event.ends_on]);
-  const amount = calculateBookingAmount(event, { mode, arrivalDate, departureDate, dayGuestDates });
+  const amount = calculateBookingAmount(event, { mode, arrivalDate, departureDate, dayGuestDates, participantCount });
 
   return (
     <form className="form-panel booking-panel" action={submitBookingAction}>
@@ -30,6 +31,21 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
           <CalendarCheck size={18} /> Tagesgast
         </button>
       </div>
+
+      <label>
+        Personen
+        <select
+          name="participantCount"
+          value={participantCount}
+          onChange={(event) => setParticipantCount(Number.parseInt(event.target.value, 10))}
+          disabled={locked}
+          required
+        >
+          <option value={1}>Ich komme alleine</option>
+          <option value={2}>Ich komme mit einer zweiten Person</option>
+          <option value={3}>Ich komme mit zwei weiteren Personen</option>
+        </select>
+      </label>
 
       {mode === "overnight" ? (
         <div className="form-grid two">
@@ -98,7 +114,7 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
           <strong>{formatCurrency(amount)}</strong>
         </div>
         <p>
-          <Beer size={18} /> Bierkastenpflicht pro Person bleibt Ehrensache und Pflicht.
+          <Beer size={18} /> {formatParticipantCount(participantCount)}, Bierkastenpflicht pro Person bleibt Ehrensache und Pflicht.
         </p>
       </div>
 

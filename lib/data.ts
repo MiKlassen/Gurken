@@ -1,20 +1,28 @@
 import { redirect } from "next/navigation";
 import { hasSupabaseEnv, getInitialAdminEmails } from "@/lib/env";
+import { decryptBookingFields, decryptGalleryPhoto, decryptProfileFields } from "@/lib/personal-data";
 import { createAdminClient, hasServiceRoleKey } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { BookingRecord, BookingWithProfile, EventRecord, GalleryPhoto, ProfileRecord } from "@/lib/types";
+import type { AdminMembershipRecord, BookingRecord, BookingWithProfile, EventRecord, GalleryPhoto, ProfileRecord } from "@/lib/types";
 
 export const demoEvent: EventRecord = {
   id: "demo",
   year: 2026,
   name: "Stimme-Stämme Treffen",
+  subject: "Stimme-Stämme Treffen 2026",
   slug: "stimme-staemme-2026",
   is_active: true,
   starts_on: "2026-08-14",
   ends_on: "2026-08-17",
   public_summary: "Ein internes Gurken-Wochenende mit Stimmen, Stämmen, Kaltgetränken und regionaler Bierkastenpflicht.",
   location_label: "Ort nach Login",
+  location_address: null,
+  location_url: null,
   location_details: "Der genaue Treffpunkt ist im Mitgliederbereich sichtbar.",
+  location_meta_label_1: null,
+  location_meta_value_1: null,
+  location_meta_label_2: null,
+  location_meta_value_2: null,
   member_limit: 42,
   overnight_price_cents: 2500,
   day_guest_price_cents: 1200,
@@ -27,6 +35,15 @@ export function isProfileComplete(profile: ProfileRecord | null) {
   return Boolean(profile?.first_name && profile.last_name && profile.hometown);
 }
 
+function bookingProfile(profile?: ProfileRecord | null) {
+  if (!profile) return null;
+  return {
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    hometown: profile.hometown
+  };
+}
+
 export async function getActiveEventPublic() {
   if (!hasSupabaseEnv() || !hasServiceRoleKey()) return demoEvent;
 
@@ -34,7 +51,7 @@ export async function getActiveEventPublic() {
   const { data, error } = await supabase
     .from("events")
     .select(
-      "id, year, name, slug, is_active, starts_on, ends_on, public_summary, location_label, location_details, member_limit, overnight_price_cents, day_guest_price_cents, payment_iban, payment_paypal_url, payment_note"
+      "id, year, name, subject, slug, is_active, starts_on, ends_on, public_summary, location_label, location_address, location_url, location_details, location_meta_label_1, location_meta_value_1, location_meta_label_2, location_meta_value_2, member_limit, overnight_price_cents, day_guest_price_cents, payment_iban, payment_paypal_url, payment_note"
     )
     .eq("is_active", true)
     .order("starts_on", { ascending: true })
@@ -64,7 +81,7 @@ export async function requireVerifiedUser() {
 export async function getCurrentProfile(userId: string) {
   const supabase = await createClient();
   const { data } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
-  return data as ProfileRecord | null;
+  return decryptProfileFields(data as ProfileRecord | null);
 }
 
 export async function requireCompleteProfile(userId: string) {
@@ -90,7 +107,7 @@ export async function getBookingForUser(eventId: string, userId: string) {
     .neq("status", "cancelled")
     .maybeSingle();
 
-  return data as BookingRecord | null;
+  return data ? decryptBookingFields(data as BookingRecord) : null;
 }
 
 export async function listGalleryPhotos(eventId: string) {
@@ -101,7 +118,7 @@ export async function listGalleryPhotos(eventId: string) {
     .eq("event_id", eventId)
     .order("created_at", { ascending: false });
 
-  const rows = (data || []) as GalleryPhoto[];
+  const rows = ((data || []) as GalleryPhoto[]).map(decryptGalleryPhoto);
 
   const signed = await Promise.all(
     rows.map(async (photo) => {
@@ -134,21 +151,37 @@ export async function requireAdmin() {
   return user;
 }
 
+export async function getIsAdmin(userId: string, email?: string | null) {
+  await ensureSeededAdmin(userId, email);
+
+  const supabase = await createClient();
+  const { data } = await supabase.from("admin_memberships").select("user_id").eq("user_id", userId).maybeSingle();
+  return Boolean(data);
+}
+
 export async function getAdminOverview() {
   const supabase = await createClient();
 
-  const [events, profiles, bookings] = await Promise.all([
+  const [events, profiles, bookings, adminMemberships] = await Promise.all([
     supabase.from("events").select("*").order("starts_on", { ascending: false }),
     supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-    supabase
-      .from("bookings")
-      .select("*, profiles(first_name,last_name,hometown)")
-      .order("created_at", { ascending: false })
+    supabase.from("bookings").select("*").order("created_at", { ascending: false }),
+    supabase.from("admin_memberships").select("*").order("created_at", { ascending: false })
   ]);
+
+  const decryptedProfiles = ((profiles.data || []) as ProfileRecord[]).map(decryptProfileFields);
+  const profileByUserId = new Map(decryptedProfiles.map((profile) => [profile.user_id, profile]));
+  const bookingsWithProfiles = ((bookings.data || []) as BookingRecord[]).map((booking) =>
+    decryptBookingFields({
+      ...booking,
+      profiles: bookingProfile(profileByUserId.get(booking.user_id))
+    } as BookingWithProfile)
+  );
 
   return {
     events: (events.data || []) as EventRecord[],
-    profiles: (profiles.data || []) as ProfileRecord[],
-    bookings: (bookings.data || []) as BookingWithProfile[]
+    profiles: decryptedProfiles,
+    bookings: bookingsWithProfiles,
+    adminMemberships: (adminMemberships.data || []) as AdminMembershipRecord[]
   };
 }

@@ -33,6 +33,9 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           <TurnstileWidget />
           <SubmitButton pendingLabel="Registriert...">Account anlegen</SubmitButton>
         </form>
+        <p className="legal-note">
+          Hinweise zur Verarbeitung deiner Daten findest du in der <Link href="/datenschutz">Datenschutzerklärung</Link>.
+        </p>
         <p>
           Schon registriert? <Link href="/auth/login">Einloggen</Link>
         </p>

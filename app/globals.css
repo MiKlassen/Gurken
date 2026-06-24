@@ -256,8 +256,10 @@ button:disabled {
 .app-shell > .quick-actions,
 .app-shell > .form-panel,
 .app-shell > .photo-grid,
+.app-shell > .location-layout,
 .app-shell > .admin-grid,
-.app-shell > .table-panel {
+.app-shell > .table-panel,
+.app-shell > .legal-content {
   max-width: var(--content);
   margin-left: auto;
   margin-right: auto;
@@ -374,6 +376,78 @@ button:disabled {
   margin-top: 20px;
 }
 
+.install-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  max-width: var(--content);
+  margin: 8px auto 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 24px;
+  background: #f1f8e6;
+  box-shadow: 0 8px 28px rgba(36, 60, 20, 0.08);
+}
+
+.install-panel-main {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.install-panel-main svg,
+.install-panel-note svg {
+  flex: 0 0 auto;
+  color: var(--green);
+}
+
+.install-panel h2 {
+  margin: 0 0 4px;
+  color: var(--green-dark);
+  font-size: 1.05rem;
+}
+
+.install-panel p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.install-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.install-fallback {
+  max-width: 340px;
+  text-align: right;
+  font-size: 0.88rem;
+}
+
+.install-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 7px;
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
+.install-panel-note {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  color: var(--green-dark);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
 label,
 fieldset {
   display: grid;
@@ -432,6 +506,17 @@ td span {
   font-size: 0.86rem;
 }
 
+.legal-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.legal-note a {
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
 .notice {
   max-width: var(--content);
   margin: 16px auto;
@@ -474,6 +559,58 @@ td span {
   width: 76px;
   height: 76px;
   object-fit: contain;
+}
+
+.legal-content {
+  display: grid;
+  gap: 24px;
+  margin-top: 12px;
+  margin-bottom: 72px;
+}
+
+.legal-content section {
+  display: grid;
+  gap: 10px;
+}
+
+.legal-content h2 {
+  margin: 0;
+}
+
+.legal-content p,
+.legal-content li,
+.legal-content address {
+  max-width: 920px;
+  color: var(--muted);
+}
+
+.legal-content address {
+  font-style: normal;
+}
+
+.legal-content ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.legal-content a {
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
+.legal-warning {
+  border: 1px solid #e3c86e;
+  border-radius: var(--radius);
+  padding: 13px 15px;
+  background: #fff9df;
+  color: #66540e;
+  font-weight: 800;
+}
+
+.legal-backlink {
+  padding-top: 8px;
 }
 
 .dashboard-hero {
@@ -523,6 +660,66 @@ td span {
   margin-top: 10px;
   border-left: 4px solid var(--yellow);
   padding-left: 10px;
+}
+
+.panel-action {
+  margin-top: 12px;
+}
+
+.location-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+  padding-top: 12px;
+  padding-bottom: 72px;
+}
+
+.location-main,
+.location-side {
+  align-self: start;
+}
+
+.location-main h3 {
+  margin: 18px 0 6px;
+  color: var(--green-dark);
+  font-size: 0.92rem;
+  text-transform: uppercase;
+}
+
+.location-address {
+  white-space: pre-line;
+}
+
+.location-link {
+  margin-top: 18px;
+}
+
+.location-facts {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.location-facts div {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.location-facts dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.location-facts dd {
+  margin: 3px 0 0;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.notice-inline {
+  color: var(--muted);
 }
 
 .status {
@@ -716,10 +913,32 @@ td span {
   grid-template-columns: minmax(0, 1fr) 330px;
   gap: 16px;
   align-items: start;
+  margin-top: 16px;
+  margin-bottom: 72px;
 }
 
 .admin-form {
   padding: 22px;
+}
+
+.settings-form {
+  grid-column: 1 / -1;
+}
+
+.settings-form h3 {
+  margin: 8px 0 0;
+  color: var(--green-dark);
+}
+
+.settings-title-row {
+  margin-bottom: 0;
+}
+
+.secret-status-grid {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .checkbox-line {
@@ -740,7 +959,40 @@ td span {
 
 .table-panel {
   margin-top: 16px;
-  margin-bottom: 72px;
+  margin-bottom: 16px;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.section-title-row h2 {
+  margin-top: 0;
+}
+
+.admin-metrics {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-metrics span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 5px 9px;
+  background: #fbfff5;
+  color: var(--green-dark);
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
 .table-wrap {
@@ -749,8 +1001,12 @@ td span {
 
 table {
   width: 100%;
-  min-width: 820px;
+  min-width: 1240px;
   border-collapse: collapse;
+}
+
+.members-table {
+  min-width: 1060px;
 }
 
 th,
@@ -777,11 +1033,39 @@ th {
   min-width: 150px;
 }
 
+.booking-actions {
+  display: grid;
+  gap: 8px;
+  min-width: 240px;
+}
+
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 9px;
+  background: #fbfff5;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.role-pill-admin {
+  border-color: #9fcb65;
+  background: #eef8df;
+  color: var(--green-dark);
+}
+
 @media (max-width: 900px) {
   .site-header,
   .hero-section,
   .info-section,
   .dashboard-hero,
+  .install-panel,
+  .location-layout,
   .admin-grid {
     grid-template-columns: 1fr;
   }
@@ -835,9 +1119,16 @@ th {
 
   .booking-total,
   .inline-reset,
+  .install-panel-actions,
+  .secret-status-grid,
   .status-form {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .install-fallback {
+    max-width: none;
+    text-align: left;
   }
 
   .page-heading,

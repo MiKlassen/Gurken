@@ -2,13 +2,20 @@ export type EventRecord = {
   id: string;
   year: number;
   name: string;
+  subject: string;
   slug: string;
   is_active: boolean;
   starts_on: string;
   ends_on: string;
   public_summary: string;
   location_label: string;
+  location_address: string | null;
+  location_url: string | null;
   location_details: string;
+  location_meta_label_1: string | null;
+  location_meta_value_1: string | null;
+  location_meta_label_2: string | null;
+  location_meta_value_2: string | null;
   member_limit: number;
   overnight_price_cents: number;
   day_guest_price_cents: number;
@@ -26,6 +33,12 @@ export type ProfileRecord = {
   updated_at: string;
 };
 
+export type AdminMembershipRecord = {
+  user_id: string;
+  granted_by: string | null;
+  created_at: string;
+};
+
 export type BookingStatus = "pending_payment" | "paid" | "waitlisted" | "cancelled";
 export type BookingMode = "overnight" | "day_guest";
 
@@ -37,9 +50,12 @@ export type BookingRecord = {
   arrival_date: string | null;
   departure_date: string | null;
   day_guest_dates: string[] | null;
+  participant_count: number;
   amount_cents: number;
   status: BookingStatus;
   beer_crate_region: string | null;
+  payment_reminder_sent_at: string | null;
+  payment_reminder_count: number;
   created_at: string;
   updated_at: string;
 };
@@ -55,4 +71,11 @@ export type GalleryPhoto = {
 
 export type BookingWithProfile = BookingRecord & {
   profiles: Pick<ProfileRecord, "first_name" | "last_name" | "hometown"> | null;
+};
+
+export type AppSettingRecord = {
+  key: string;
+  value: unknown;
+  updated_by: string | null;
+  updated_at: string;
 };

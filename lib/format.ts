@@ -14,6 +14,22 @@ export function formatDate(date: string | null | undefined) {
   }).format(new Date(`${date}T12:00:00`));
 }
 
+export function formatDateTime(date: string | null | undefined) {
+  if (!date) return "offen";
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(date));
+}
+
+export function formatParticipantCount(count: number | null | undefined) {
+  const normalized = count || 1;
+  return normalized === 1 ? "1 Person" : `${normalized} Personen`;
+}
+
 export function datesBetween(start: string, end: string) {
   const result: string[] = [];
   const cursor = new Date(`${start}T12:00:00`);

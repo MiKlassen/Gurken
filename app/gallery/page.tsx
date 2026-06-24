@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Images } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
 import { GalleryUpload } from "@/components/gallery-upload";
-import { getActiveEventForMember, listGalleryPhotos, requireCompleteProfile, requireVerifiedUser } from "@/lib/data";
+import { getActiveEventForMember, getIsAdmin, listGalleryPhotos, requireCompleteProfile, requireVerifiedUser } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -11,15 +11,14 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export default async function GalleryPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireVerifiedUser();
   await requireCompleteProfile(user.id);
-  const params = await searchParams;
+  const [params, isAdmin, event] = await Promise.all([searchParams, getIsAdmin(user.id, user.email), getActiveEventForMember()]);
   const error = typeof params.error === "string" ? params.error : "";
   const message = typeof params.message === "string" ? params.message : "";
-  const event = await getActiveEventForMember();
   const photos = event ? await listGalleryPhotos(event.id) : [];
 
   return (
     <main className="app-shell">
-      <BrandHeader isAuthed />
+      <BrandHeader isAuthed isAdmin={isAdmin} />
       <section className="page-heading spread">
         <div>
           <Images size={34} />
