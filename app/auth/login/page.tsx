@@ -2,7 +2,6 @@ import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
 import { signInAction, resetPasswordAction } from "@/app/actions/auth";
 import { BrandHeader } from "@/components/brand-header";
-import { SubmitButton } from "@/components/submit-button";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -31,13 +30,15 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
             Passwort
             <input type="password" name="password" autoComplete="current-password" required />
           </label>
-          <SubmitButton>Einloggen</SubmitButton>
+          <button className="button primary" type="submit">
+            Einloggen
+          </button>
         </form>
         <form className="inline-reset" action={resetPasswordAction}>
           <input type="email" name="email" placeholder="Mail für Reset" aria-label="E-Mail für Passwort-Reset" />
-          <SubmitButton className="button secondary small" pendingLabel="Sendet...">
+          <button className="button secondary small" type="submit">
             Reset-Mail
-          </SubmitButton>
+          </button>
         </form>
         <p>
           Noch kein Account? <Link href="/auth/register">Registrieren</Link>
