@@ -1,5 +1,6 @@
 import { Bed, CalendarDays, ClipboardList, UsersRound } from "lucide-react";
 import { saveRoomAssignmentAction } from "@/app/actions/admin";
+import { AttendanceMap } from "@/components/attendance-map";
 import { BrandHeader } from "@/components/brand-header";
 import { SubmitButton } from "@/components/submit-button";
 import { demoEvent, getAdminOverview, requireAdmin } from "@/lib/data";
@@ -24,10 +25,6 @@ type ArrivalHint = {
   time: string;
   participantCount: number;
 };
-
-function weekday(date: string) {
-  return new Intl.DateTimeFormat("de-DE", { weekday: "long" }).format(new Date(`${date}T12:00:00`));
-}
 
 function bookingTouchesDate(booking: BookingRecord, date: string) {
   if (booking.mode === "overnight") {
@@ -190,66 +187,7 @@ export default async function EventPage({ searchParams }: { searchParams: Search
             <span>{peak} / {activeEvent.member_limit} Spitze</span>
           </div>
         </div>
-        <div className="table-wrap">
-          <table className="occupancy-table">
-            <thead>
-              <tr>
-                <th>Tag</th>
-                <th>Datum</th>
-                <th>Übernachtung</th>
-                <th>Tagesgäste</th>
-                <th>Gesamt</th>
-                <th>Warteliste</th>
-                <th>Anreisen</th>
-                <th>Auslastung</th>
-              </tr>
-            </thead>
-            <tbody>
-              {occupancyPlan.map((day) => {
-                const occupancyPercent = activeEvent.member_limit > 0 ? Math.min(100, (day.total / activeEvent.member_limit) * 100) : 0;
-
-                return (
-                  <tr key={day.date}>
-                    <td>{weekday(day.date)}</td>
-                    <td>{formatDate(day.date)}</td>
-                    <td>{formatParticipantCount(day.overnight)}</td>
-                    <td>{formatParticipantCount(day.dayGuests)}</td>
-                    <td>
-                      <strong>{formatParticipantCount(day.total)}</strong>
-                    </td>
-                    <td>{day.waitlisted ? formatParticipantCount(day.waitlisted) : "-"}</td>
-                    <td>
-                      {day.arrivals.length ? (
-                        <ul className="arrival-list">
-                          {day.arrivals.map((arrival) => (
-                            <li key={`${day.date}-${arrival.name}-${arrival.time}`}>
-                              <strong>{arrival.time}</strong>
-                              <span>
-                                {arrival.name}, {formatParticipantCount(arrival.participantCount)}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td>
-                      <div className="occupancy-cell">
-                        <div className="occupancy-track" aria-hidden="true">
-                          <span style={{ width: `${occupancyPercent}%` }} />
-                        </div>
-                        <span>
-                          {day.total} / {activeEvent.member_limit}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <AttendanceMap days={occupancyPlan} memberLimit={activeEvent.member_limit} />
       </section>
 
       <section className="panel room-plan-panel">
