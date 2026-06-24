@@ -1,10 +1,8 @@
 import { revalidatePath } from "next/cache";
 import { getActiveEventForMember, requireCompleteProfile, requireVerifiedUser } from "@/lib/data";
+import { formatMegabytes, MAX_GALLERY_PHOTO_COUNT, MAX_GALLERY_PHOTO_SIZE, MAX_GALLERY_UPLOAD_SIZE } from "@/lib/gallery-limits";
 import { encryptGalleryCaption } from "@/lib/personal-data";
 import { createClient } from "@/lib/supabase/server";
-
-const MAX_PHOTO_SIZE = 10 * 1024 * 1024;
-const MAX_PHOTO_COUNT = 20;
 
 function formText(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -16,9 +14,20 @@ function getCaption(formData: FormData) {
   return caption ? caption.slice(0, 140) : null;
 }
 
+function isUploadFile(value: FormDataEntryValue): value is File {
+  if (typeof value !== "object" || value === null) return false;
+
+  const candidate = value as Partial<File>;
+  return (
+    typeof candidate.size === "number" &&
+    typeof candidate.type === "string" &&
+    typeof candidate.arrayBuffer === "function"
+  );
+}
+
 function getPhotoFiles(formData: FormData) {
   const values = [...formData.getAll("photos"), ...formData.getAll("photo")];
-  return values.filter((value): value is File => value instanceof File && value.size > 0);
+  return values.filter((value): value is File => isUploadFile(value) && value.size > 0);
 }
 
 export async function uploadGalleryPhotos(formData: FormData) {
@@ -30,15 +39,26 @@ export async function uploadGalleryPhotos(formData: FormData) {
 
   const files = getPhotoFiles(formData);
   if (!files.length) return { ok: false, message: "Bitte mindestens ein Foto auswählen.", count: 0 };
-  if (files.length > MAX_PHOTO_COUNT) return { ok: false, message: `Bitte maximal ${MAX_PHOTO_COUNT} Fotos gleichzeitig hochladen.`, count: 0 };
+  if (files.length > MAX_GALLERY_PHOTO_COUNT) {
+    return { ok: false, message: `Bitte maximal ${MAX_GALLERY_PHOTO_COUNT} Fotos gleichzeitig hochladen.`, count: 0 };
+  }
+
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+  if (totalSize > MAX_GALLERY_UPLOAD_SIZE) {
+    return {
+      ok: false,
+      message: `Bitte maximal ${formatMegabytes(MAX_GALLERY_UPLOAD_SIZE)} pro Upload auswählen.`,
+      count: 0
+    };
+  }
 
   for (const file of files) {
     if (!file.type.startsWith("image/")) {
       return { ok: false, message: "Nur Bilddateien sind erlaubt.", count: 0 };
     }
 
-    if (file.size > MAX_PHOTO_SIZE) {
-      return { ok: false, message: "Fotos dürfen maximal 10 MB groß sein.", count: 0 };
+    if (file.size > MAX_GALLERY_PHOTO_SIZE) {
+      return { ok: false, message: `Fotos dürfen maximal ${formatMegabytes(MAX_GALLERY_PHOTO_SIZE)} groß sein.`, count: 0 };
     }
   }
 

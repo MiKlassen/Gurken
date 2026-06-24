@@ -17,8 +17,16 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const formData = await request.formData();
-  const result = await uploadGalleryPhotos(formData);
+  let result;
+  try {
+    const formData = await request.formData();
+    result = await uploadGalleryPhotos(formData);
+  } catch (error) {
+    console.error("Share target gallery upload failed", error);
+    return redirectToGallery(request, {
+      error: "Upload fehlgeschlagen. Bitte versuche es mit kleineren Fotos erneut."
+    });
+  }
 
   if (!result.ok) {
     return redirectToGallery(request, { error: result.message });

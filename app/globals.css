@@ -997,6 +997,17 @@ td span {
   margin-bottom: 22px;
 }
 
+.upload-error {
+  margin: 0;
+  border: 1px solid #edb0a9;
+  border-radius: 8px;
+  background: #fff1ef;
+  color: #8e2a20;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
