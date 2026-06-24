@@ -45,7 +45,7 @@ export default async function HomePage() {
         </div>
         <div className="hero-art" aria-hidden="true">
           <Image className="hero-wappen" src="/assets/stammeswappen.png" alt="" fill priority sizes="(max-width: 900px) 100vw, 42vw" />
-          <Image className="hero-chungus" src="/assets/chungus.png" alt="" width={190} height={190} priority />
+          <Image className="hero-chungus" src="/assets/chungus.png" alt="" width={190} height={313} priority />
         </div>
       </section>
 

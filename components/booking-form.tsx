@@ -8,6 +8,10 @@ import { calculateBookingAmount } from "@/lib/booking";
 import { datesBetween, formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
 import type { BookingMode, BookingRecord, EventRecord } from "@/lib/types";
 
+function beerCrateLabel(count: number) {
+  return count === 1 ? "1 Bierkasten" : `${count} Bierkästen`;
+}
+
 export function BookingForm({ event, booking }: { event: EventRecord; booking: BookingRecord | null }) {
   const [mode, setMode] = useState<BookingMode>(booking?.mode || "overnight");
   const [arrivalDate, setArrivalDate] = useState(booking?.arrival_date || event.starts_on);
@@ -110,11 +114,12 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
 
       <div className="booking-total">
         <div>
-          <span>Aktueller Betrag</span>
+          <span>Betrag</span>
           <strong>{formatCurrency(amount)}</strong>
         </div>
         <p>
-          <Beer size={18} /> {formatParticipantCount(participantCount)}, Bierkastenpflicht pro Person bleibt Ehrensache und Pflicht.
+          <Beer size={18} /> {beerCrateLabel(participantCount)} für {formatParticipantCount(participantCount)},
+          Bierkastenpflicht pro Person bleibt Ehrensache und Pflicht.
         </p>
       </div>
 

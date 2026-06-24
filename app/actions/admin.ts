@@ -97,25 +97,25 @@ export async function saveEventAction(formData: FormData) {
   };
 
   if (!payload.year || !payload.name || !payload.subject || !payload.slug || !payload.starts_on || !payload.ends_on || !payload.member_limit) {
-    redirect("/admin?error=Bitte alle Pflichtfelder für das Treffen ausfüllen.");
+    redirect("/admin?bereich=event&error=Bitte alle Pflichtfelder für das Treffen ausfüllen.");
   }
 
   if (locationUrl === "") {
-    redirect("/admin?error=Bitte einen gültigen Ortslink mit http oder https angeben.");
+    redirect("/admin?bereich=event&error=Bitte einen gültigen Ortslink mit http oder https angeben.");
   }
 
   const startsAt = dateValue(payload.starts_on);
   const endsAt = dateValue(payload.ends_on);
   if (startsAt === null || endsAt === null) {
-    redirect("/admin?error=Bitte gültige Datumswerte angeben.");
+    redirect("/admin?bereich=event&error=Bitte gültige Datumswerte angeben.");
   }
 
   if (endsAt < startsAt) {
-    redirect("/admin?error=Das Enddatum darf nicht vor dem Startdatum liegen.");
+    redirect("/admin?bereich=event&error=Das Enddatum darf nicht vor dem Startdatum liegen.");
   }
 
   if (payload.overnight_price_cents < 0 || payload.day_guest_price_cents < 0) {
-    redirect("/admin?error=Preise dürfen nicht negativ sein.");
+    redirect("/admin?bereich=event&error=Preise dürfen nicht negativ sein.");
   }
 
   const query = eventId
@@ -123,14 +123,14 @@ export async function saveEventAction(formData: FormData) {
     : supabase.from("events").insert(payload);
 
   const { error } = await query;
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/admin?bereich=event&error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/");
   revalidatePath("/dashboard");
   revalidatePath("/book");
   revalidatePath("/location");
   revalidatePath("/admin");
-  redirect("/admin?message=Treffen gespeichert.");
+  redirect("/admin?bereich=event&message=Treffen gespeichert.");
 }
 
 export async function saveAppSettingsAction(formData: FormData) {
@@ -151,18 +151,18 @@ export async function saveAppSettingsAction(formData: FormData) {
   };
 
   if (!settings.smtpFrom) {
-    redirect("/admin?error=Bitte einen SMTP-Absender angeben.");
+    redirect("/admin?bereich=einstellungen&error=Bitte einen SMTP-Absender angeben.");
   }
 
   if (settings.paymentRemindersEnabled && !settings.smtpHost) {
-    redirect("/admin?error=Bitte SMTP-Host setzen oder Zahlungsreminder deaktivieren.");
+    redirect("/admin?bereich=einstellungen&error=Bitte SMTP-Host setzen oder Zahlungsreminder deaktivieren.");
   }
 
   const { error } = await saveAppSettings(settings, user.id);
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/admin?bereich=einstellungen&error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/admin");
-  redirect("/admin?message=Systemeinstellungen gespeichert.");
+  redirect("/admin?bereich=einstellungen&message=Systemeinstellungen gespeichert.");
 }
 
 export async function updateBookingStatusAction(formData: FormData) {
@@ -172,17 +172,17 @@ export async function updateBookingStatusAction(formData: FormData) {
   const status = text(formData, "status") as BookingStatus;
 
   if (!bookingId || !["pending_payment", "paid", "waitlisted", "cancelled"].includes(status)) {
-    redirect("/admin?error=Ungültiger Buchungsstatus.");
+    redirect("/admin?bereich=buchungen&error=Ungültiger Buchungsstatus.");
   }
 
   const supabase = await createClient();
   const { error } = await supabase.from("bookings").update({ status }).eq("id", bookingId);
 
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/admin?bereich=buchungen&error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
-  redirect("/admin?message=Buchung aktualisiert.");
+  redirect("/admin?bereich=buchungen&message=Buchung aktualisiert.");
 }
 
 export async function confirmBookingAction(formData: FormData) {
@@ -190,17 +190,17 @@ export async function confirmBookingAction(formData: FormData) {
 
   const bookingId = text(formData, "bookingId");
   if (!bookingId) {
-    redirect("/admin?error=Buchung fehlt.");
+    redirect("/admin?bereich=buchungen&error=Buchung fehlt.");
   }
 
   const supabase = await createClient();
   const { error } = await supabase.from("bookings").update({ status: "paid" satisfies BookingStatus }).eq("id", bookingId);
 
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/admin?bereich=buchungen&error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
-  redirect("/admin?message=Buchung bestätigt.");
+  redirect("/admin?bereich=buchungen&message=Buchung bestätigt.");
 }
 
 export async function promoteMemberToAdminAction(formData: FormData) {
@@ -208,7 +208,7 @@ export async function promoteMemberToAdminAction(formData: FormData) {
   const userId = text(formData, "userId");
 
   if (!userId) {
-    redirect("/admin?error=Mitglied fehlt.");
+    redirect("/admin?bereich=mitglieder&error=Mitglied fehlt.");
   }
 
   const supabase = await createClient();
@@ -220,11 +220,11 @@ export async function promoteMemberToAdminAction(formData: FormData) {
     { onConflict: "user_id" }
   );
 
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/admin?bereich=mitglieder&error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
-  redirect("/admin?message=Mitglied ist jetzt Admin.");
+  redirect("/admin?bereich=mitglieder&message=Mitglied ist jetzt Admin.");
 }
 
 export async function encryptExistingPersonalDataAction() {
@@ -238,7 +238,7 @@ export async function encryptExistingPersonalDataAction() {
   ]);
 
   const firstError = profilesResult.error || bookingsResult.error || photosResult.error;
-  if (firstError) redirect(`/admin?error=${encodeURIComponent(firstError.message)}`);
+  if (firstError) redirect(`/admin?bereich=admins&error=${encodeURIComponent(firstError.message)}`);
 
   const profiles = (profilesResult.data || []) as ProfileRecord[];
   const bookings = (bookingsResult.data || []) as BookingRecord[];
@@ -270,9 +270,9 @@ export async function encryptExistingPersonalDataAction() {
 
     const results = await Promise.all(updates);
     const updateError = results.find((result) => result.error)?.error;
-    if (updateError) redirect(`/admin?error=${encodeURIComponent(updateError.message)}`);
+    if (updateError) redirect(`/admin?bereich=admins&error=${encodeURIComponent(updateError.message)}`);
   } catch (error) {
-    redirect(`/admin?error=${encodeURIComponent(error instanceof Error ? error.message : "Verschlüsselung fehlgeschlagen.")}`);
+    redirect(`/admin?bereich=admins&error=${encodeURIComponent(error instanceof Error ? error.message : "Verschlüsselung fehlgeschlagen.")}`);
   }
 
   revalidatePath("/admin");
@@ -280,20 +280,20 @@ export async function encryptExistingPersonalDataAction() {
   revalidatePath("/book");
   revalidatePath("/gallery");
   revalidatePath("/gallery/slideshow");
-  redirect(`/admin?message=${profiles.length + bookings.length + photos.length} Datensätze verschlüsselt.`);
+  redirect(`/admin?bereich=admins&message=${profiles.length + bookings.length + photos.length} Datensätze verschlüsselt.`);
 }
 
 export async function addAdminAction(formData: FormData) {
   const user = await requireAdmin();
   const email = text(formData, "email").toLowerCase();
-  if (!email) redirect("/admin?error=Bitte E-Mail für neuen Admin angeben.");
+  if (!email) redirect("/admin?bereich=admins&error=Bitte E-Mail für neuen Admin angeben.");
 
   const adminClient = createAdminClient();
   const { data, error: listError } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (listError) redirect(`/admin?error=${encodeURIComponent(listError.message)}`);
+  if (listError) redirect(`/admin?bereich=admins&error=${encodeURIComponent(listError.message)}`);
 
   const target = data.users.find((candidate) => candidate.email?.toLowerCase() === email);
-  if (!target) redirect(`/admin?error=${encodeURIComponent(`Kein Benutzer für ${email} gefunden.`)}`);
+  if (!target) redirect(`/admin?bereich=admins&error=${encodeURIComponent(`Kein Benutzer für ${email} gefunden.`)}`);
 
   const { error } = await adminClient.from("admin_memberships").upsert(
     {
@@ -303,6 +303,6 @@ export async function addAdminAction(formData: FormData) {
     { onConflict: "user_id" }
   );
 
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
-  redirect("/admin?message=Admin hinzugefügt.");
+  if (error) redirect(`/admin?bereich=admins&error=${encodeURIComponent(error.message)}`);
+  redirect("/admin?bereich=admins&message=Admin hinzugefügt.");
 }

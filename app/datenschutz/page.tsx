@@ -21,24 +21,19 @@ export default function DatenschutzPage() {
       </section>
 
       <article className="panel legal-content">
-        <p className="legal-warning">
-          Diese Datenschutzerklärung ist als projektspezifische Vorlage angelegt. Verantwortliche Person, Anschrift und
-          Datenschutzkontakt müssen vor Veröffentlichung verbindlich ergänzt und rechtlich geprüft werden.
-        </p>
-
         <section>
           <h2>1. Verantwortliche Stelle</h2>
           <p>
             Verantwortlich für die Verarbeitung personenbezogener Daten im Rahmen dieser App ist:
           </p>
           <address>
-            <strong>[Name / Organisation ergänzen]</strong>
+            <strong>Michael Klassen</strong>
             <br />
-            [Straße, Hausnummer ergänzen]
+            Bonhoefferstraße 42
             <br />
-            [PLZ, Ort ergänzen]
+            58739 Wickede
             <br />
-            E-Mail: [Datenschutzkontakt ergänzen]
+            E-Mail: <a href="mailto:michael@klassen.ruhr">michael@klassen.ruhr</a>
           </address>
         </section>
 

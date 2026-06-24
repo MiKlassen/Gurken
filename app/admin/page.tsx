@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   addAdminAction,
   confirmBookingAction,
@@ -19,6 +20,15 @@ import type { BookingMode, BookingRecord, BookingStatus } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+type AdminSection = "buchungen" | "mitglieder" | "event" | "admins" | "einstellungen";
+
+const adminSections: { id: AdminSection; label: string }[] = [
+  { id: "buchungen", label: "Buchungen" },
+  { id: "mitglieder", label: "Mitglieder" },
+  { id: "event", label: "Event" },
+  { id: "admins", label: "Admins" },
+  { id: "einstellungen", label: "Einstellungen" }
+];
 
 const bookingStatusOptions: { value: BookingStatus; label: string }[] = [
   { value: "pending_payment", label: "Zahlung offen" },
@@ -36,6 +46,11 @@ function secretStateLabel(value: boolean) {
   return value ? "gesetzt" : "fehlt";
 }
 
+function getAdminSection(value: string | string[] | undefined): AdminSection {
+  const section = typeof value === "string" ? value : "";
+  return adminSections.some((entry) => entry.id === section) ? (section as AdminSection) : "buchungen";
+}
+
 function bookingPeriod(booking: BookingRecord) {
   if (booking.mode === "overnight") {
     return `${formatDate(booking.arrival_date)} bis ${formatDate(booking.departure_date)}`;
@@ -47,6 +62,7 @@ function bookingPeriod(booking: BookingRecord) {
 export default async function AdminPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdmin();
   const params = await searchParams;
+  const activeSection = getAdminSection(params.bereich);
   const error = typeof params.error === "string" ? params.error : "";
   const message = typeof params.message === "string" ? params.message : "";
   const [{ events, bookings, profiles, adminMemberships }, appSettings] = await Promise.all([
@@ -77,6 +93,19 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       {error ? <p className="notice error">{error}</p> : null}
       {message ? <p className="notice success">{message}</p> : null}
 
+      <nav className="admin-tabs" aria-label="Admin-Unterpunkte">
+        {adminSections.map((section) => (
+          <Link
+            key={section.id}
+            className={section.id === activeSection ? "active" : ""}
+            href={`/admin?bereich=${section.id}`}
+          >
+            {section.label}
+          </Link>
+        ))}
+      </nav>
+
+      {activeSection === "buchungen" ? (
       <section className="panel table-panel">
         <div className="section-title-row">
           <div>
@@ -170,7 +199,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </table>
         </div>
       </section>
+      ) : null}
 
+      {activeSection === "mitglieder" ? (
       <section className="panel table-panel">
         <div className="section-title-row">
           <div>
@@ -241,8 +272,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </table>
         </div>
       </section>
+      ) : null}
 
-      <section className="admin-grid">
+      {activeSection === "event" ? (
+      <section className="admin-grid admin-grid-single">
         <form className="form-panel admin-form" action={saveEventAction}>
           <h2>Event konfigurieren</h2>
           <p className="form-hint">Startdatum, Enddatum und Preise steuern den Buchungszeitraum und die Betragsberechnung.</p>
@@ -358,7 +391,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </label>
           <SubmitButton>Treffen speichern</SubmitButton>
         </form>
+      </section>
+      ) : null}
 
+      {activeSection === "admins" ? (
+      <section className="admin-grid admin-grid-single">
         <div className="panel admin-side">
           <h2>Admins</h2>
           <form className="inline-reset" action={addAdminAction}>
@@ -381,7 +418,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           <h2>Umsatz-Snapshot</h2>
           <p>{formatCurrency(bookings.filter((booking) => booking.status === "paid").reduce((sum, booking) => sum + booking.amount_cents, 0))}</p>
         </div>
+      </section>
+      ) : null}
 
+      {activeSection === "einstellungen" ? (
+      <section className="admin-grid admin-grid-single">
         <form className="form-panel admin-form settings-form" action={saveAppSettingsAction}>
           <div className="section-title-row settings-title-row">
             <div>
@@ -459,6 +500,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           <SubmitButton>Systemeinstellungen speichern</SubmitButton>
         </form>
       </section>
+      ) : null}
     </main>
   );
 }
