@@ -40,7 +40,7 @@ Für die Supabase-Confirmation-Mail soll der Button direkt auf unsere serverseit
 nutzen. `ConfirmationURL` erzeugt je nach Flow einen PKCE-Link, der browser-/storage-abhängig sein kann.
 
 ```html
-<a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=signup&email={{ .Email }}&next=/onboarding">E-Mail bestätigen</a>
+<a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email&email={{ .Email }}&next=/onboarding">E-Mail bestätigen</a>
 ```
 
 SMTP-Linktracking sollte für Auth-Mails deaktiviert bleiben, weil Tracking-Wrapper Auth-Queryparameter verändern oder Einmal-Links vorab öffnen können.

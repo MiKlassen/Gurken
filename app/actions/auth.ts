@@ -65,7 +65,7 @@ export async function confirmEmailCodeAction(formData: FormData) {
   const { error } = await supabase.auth.verifyOtp({
     email,
     token,
-    type: "signup"
+    type: "email"
   });
 
   if (error) redirect(confirmPagePath({ email, next, error: error.message }));

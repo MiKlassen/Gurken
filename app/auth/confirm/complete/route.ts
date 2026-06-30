@@ -2,9 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSiteUrl } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
-type EmailVerificationType = "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email";
+type EmailVerificationType = "invite" | "magiclink" | "recovery" | "email_change" | "email";
 
-const emailVerificationTypes = new Set<string>(["signup", "invite", "magiclink", "recovery", "email_change", "email"]);
+const emailVerificationTypes = new Set<string>(["invite", "magiclink", "recovery", "email_change", "email"]);
 
 function getSearchParam(url: URL, key: string) {
   return url.searchParams.get(key) || "";
@@ -28,7 +28,7 @@ function confirmUrl(params: { email?: string; error?: string; message?: string; 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const tokenHash = getSearchParam(requestUrl, "token_hash");
-  const type = getSearchParam(requestUrl, "type") || "signup";
+  const type = getSearchParam(requestUrl, "type") || "email";
   const email = getSearchParam(requestUrl, "email");
   const next = safeNextPath(getSearchParam(requestUrl, "next"));
 
