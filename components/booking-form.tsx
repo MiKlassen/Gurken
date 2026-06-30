@@ -1,23 +1,43 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Beer, CalendarCheck, Moon } from "lucide-react";
 import { submitBookingAction } from "@/app/actions/booking";
 import { SubmitButton } from "@/components/submit-button";
 import { calculateBookingAmount } from "@/lib/booking";
 import { beerCrateLabel, bookingPaymentSummary } from "@/lib/booking-summary";
-import { datesBetween, formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
+import { datesBetween, formatCurrency, formatDate, formatParticipantCount, formatWeekdayDate } from "@/lib/format";
 import type { BookingMode, BookingRecord, EventRecord } from "@/lib/types";
 
+function splitExpectedArrival(value: string | null | undefined) {
+  const [date = "", timeValue = ""] = value?.split("T") || [];
+  return {
+    date,
+    time: timeValue.slice(0, 5) || "15:00"
+  };
+}
+
 export function BookingForm({ event, booking }: { event: EventRecord; booking: BookingRecord | null }) {
+  const initialExpectedArrival = splitExpectedArrival(booking?.expected_arrival_at);
   const [mode, setMode] = useState<BookingMode>(booking?.mode || "overnight");
   const [arrivalDate, setArrivalDate] = useState(booking?.arrival_date || event.starts_on);
   const [departureDate, setDepartureDate] = useState(booking?.departure_date || event.ends_on);
   const [dayGuestDates, setDayGuestDates] = useState<string[]>(booking?.day_guest_dates || [event.starts_on]);
   const [participantCount, setParticipantCount] = useState(booking?.participant_count || 1);
+  const [expectedArrivalDate, setExpectedArrivalDate] = useState(initialExpectedArrival.date || event.starts_on);
+  const [expectedArrivalTime, setExpectedArrivalTime] = useState(initialExpectedArrival.time);
   const eventDays = useMemo(() => datesBetween(event.starts_on, event.ends_on), [event.starts_on, event.ends_on]);
+  const expectedArrivalDays = useMemo(() => {
+    if (mode === "overnight") return datesBetween(arrivalDate, departureDate);
+    return eventDays.filter((day) => dayGuestDates.includes(day));
+  }, [arrivalDate, dayGuestDates, departureDate, eventDays, mode]);
   const amount = calculateBookingAmount(event, { mode, arrivalDate, departureDate, dayGuestDates, participantCount });
   const paymentPreview = booking ? { amount_cents: amount, paid_amount_cents: booking.paid_amount_cents } : null;
+
+  useEffect(() => {
+    if (!expectedArrivalDays.length) return;
+    setExpectedArrivalDate((current) => (expectedArrivalDays.includes(current) ? current : expectedArrivalDays[0]));
+  }, [expectedArrivalDays]);
 
   return (
     <form className="form-panel booking-panel" action={submitBookingAction}>
@@ -96,6 +116,46 @@ export function BookingForm({ event, booking }: { event: EventRecord; booking: B
           ))}
         </fieldset>
       )}
+
+      <fieldset className="address-fieldset">
+        <legend>Ankunft</legend>
+        <div className="form-grid two">
+          <label>
+            Wann kommst du ungefähr an?
+            <select
+              name="expectedArrivalDate"
+              value={expectedArrivalDate}
+              onChange={(event) => setExpectedArrivalDate(event.target.value)}
+              disabled={!expectedArrivalDays.length}
+              required
+            >
+              {expectedArrivalDays.length ? (
+                expectedArrivalDays.map((day) => (
+                  <option key={day} value={day}>
+                    {formatWeekdayDate(day)}
+                  </option>
+                ))
+              ) : (
+                <option value="">Erst Buchungstage auswählen</option>
+              )}
+            </select>
+          </label>
+          <label>
+            Uhrzeit
+            <input
+              name="expectedArrivalTime"
+              type="time"
+              step={900}
+              value={expectedArrivalTime}
+              onChange={(event) => setExpectedArrivalTime(event.target.value)}
+              required
+            />
+          </label>
+        </div>
+        <p className="form-hint">
+          Die auswählbaren Ankunftstage richten sich nach deinen gebuchten Tagen. Eine ungefähre Uhrzeit reicht.
+        </p>
+      </fieldset>
 
       <label>
         Bierkasten aus welcher Region?

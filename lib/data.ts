@@ -42,12 +42,7 @@ export const demoEvent: EventRecord = {
 
 export function isProfileComplete(profile: ProfileRecord | null) {
   return Boolean(
-    profile?.first_name &&
-      profile.last_name &&
-      profile.street_address &&
-      profile.postal_code &&
-      profile.city &&
-      profile.expected_arrival_at
+    profile?.first_name && profile.last_name && profile.street_address && profile.postal_code && profile.city
   );
 }
 

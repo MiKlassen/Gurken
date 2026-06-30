@@ -18,12 +18,17 @@ function safeNextPath(value: string) {
   return "/onboarding";
 }
 
+function safeEmailCodeType(value: string) {
+  return ["email", "invite", "magiclink", "recovery", "email_change"].includes(value) ? value : "email";
+}
+
 export default async function ConfirmPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const email = param(params, "email");
   const error = param(params, "error");
   const message = param(params, "message");
   const next = safeNextPath(param(params, "next"));
+  const type = safeEmailCodeType(param(params, "type"));
 
   const supabase = await createClient();
   const {
@@ -56,6 +61,7 @@ export default async function ConfirmPage({ searchParams }: { searchParams: Sear
           <>
             <form className="form-panel" action={confirmEmailCodeAction}>
               <input type="hidden" name="next" value={next} />
+              <input type="hidden" name="type" value={type} />
               <label>
                 E-Mail
                 <input type="email" name="email" autoComplete="email" defaultValue={email} required />

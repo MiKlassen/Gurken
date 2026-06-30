@@ -82,6 +82,7 @@ export type BookingRecord = {
   payment_confirmed_at: string | null;
   status: BookingStatus;
   beer_crate_region: string | null;
+  expected_arrival_at: string | null;
   payment_reminder_sent_at: string | null;
   payment_reminder_count: number;
   created_at: string;

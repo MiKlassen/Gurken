@@ -17,10 +17,9 @@ export async function saveProfileAction(formData: FormData) {
   const streetAddress = text(formData, "streetAddress");
   const postalCode = text(formData, "postalCode");
   const city = text(formData, "city");
-  const expectedArrivalAt = text(formData, "expectedArrivalAt");
 
-  if (!firstName || !lastName || !streetAddress || !postalCode || !city || !expectedArrivalAt) {
-    redirect("/onboarding?error=Bitte Vorname, Name, vollständige Anschrift und ungefähre Ankunft ausfüllen.");
+  if (!firstName || !lastName || !streetAddress || !postalCode || !city) {
+    redirect("/onboarding?error=Bitte Vorname, Name und vollständige Anschrift ausfüllen.");
   }
 
   let encryptedProfile;
@@ -31,8 +30,7 @@ export async function saveProfileAction(formData: FormData) {
       hometown: city,
       street_address: streetAddress,
       postal_code: postalCode,
-      city,
-      expected_arrival_at: expectedArrivalAt
+      city
     });
   } catch (error) {
     redirect(`/onboarding?error=${encodeURIComponent(error instanceof Error ? error.message : "Verschlüsselung fehlgeschlagen.")}`);

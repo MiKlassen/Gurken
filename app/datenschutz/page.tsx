@@ -56,8 +56,8 @@ export default async function DatenschutzPage() {
           <h2>3. Verarbeitete Daten</h2>
           <ul>
             <li>Accountdaten: E-Mail-Adresse, Passwort-Hash, Verifizierungsstatus und Login-Informationen.</li>
-            <li>Profildaten: Vorname, Name, Straße, Postleitzahl, Ort und ungefähre Ankunftszeit.</li>
-            <li>Buchungsdaten: Zeitraum, Tagesgast- oder Übernachtungsbuchung, Personenanzahl, Bierkasten-Region, Betrag und Zahlungsstatus.</li>
+            <li>Profildaten: Vorname, Name, Straße, Postleitzahl und Ort.</li>
+            <li>Buchungsdaten: Zeitraum, ungefähre Ankunftszeit, Tagesgast- oder Übernachtungsbuchung, Personenanzahl, Bierkasten-Region, Betrag und Zahlungsstatus.</li>
             <li>Admin-Daten: Admin-Rolle, Zeitpunkt der Vergabe und vergebende Person.</li>
             <li>Galeriedaten: hochgeladene Fotos, optionaler Caption-Text, Uploader und Upload-Zeitpunkt.</li>
             <li>Technische Daten: IP-Adresse, Browser-/Geräteinformationen, Logdaten, Session-Cookies und Turnstile-Prüfdaten.</li>
@@ -70,7 +70,7 @@ export default async function DatenschutzPage() {
           <p>
             Personenbezogene Inhaltsfelder in den App-Tabellen werden vor dem Speichern in der Datenbank
             anwendungsseitig verschlüsselt. Das betrifft insbesondere Profilangaben wie Vorname, Name, Anschrift und
-            ungefähre Ankunft, die Bierkasten-Region und optionale Galerie-Captions. Für die Authentifizierung notwendige Daten wie
+            ungefähre Ankunftszeit, die Bierkasten-Region und optionale Galerie-Captions. Für die Authentifizierung notwendige Daten wie
             E-Mail-Adresse, User-ID, Verifizierungsstatus und technische Login-Metadaten werden durch Supabase Auth
             verarbeitet und müssen für Anmeldung, Mailverifizierung und Passwort-Reset systembedingt verfügbar bleiben.
           </p>

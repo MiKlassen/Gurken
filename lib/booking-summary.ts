@@ -1,5 +1,5 @@
 import { escapeHtml } from "@/lib/email-templates";
-import { formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
+import { formatCurrency, formatDate, formatExpectedArrival, formatParticipantCount } from "@/lib/format";
 import type { BookingMode, BookingRecord, BookingStatus, EventRecord, ProfileRecord } from "@/lib/types";
 
 export const bookingModeLabels: Record<BookingMode, string> = {
@@ -92,6 +92,7 @@ export function bookingTemplateVariables(input: {
     eventSubject: title,
     bookingMode: bookingModeLabels[input.booking.mode],
     bookingPeriod: bookingPeriod(input.booking),
+    expectedArrival: formatExpectedArrival(input.booking.expected_arrival_at),
     participantCount: formatParticipantCount(input.booking.participant_count),
     beerCrates: beerCrateLabel(input.booking.participant_count),
     beerCrateRegion: input.booking.beer_crate_region || "offen",

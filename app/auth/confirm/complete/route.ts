@@ -16,11 +16,16 @@ function safeNextPath(value: string, fallback = "/onboarding") {
   return fallback;
 }
 
-function confirmUrl(params: { email?: string; error?: string; message?: string; next?: string }) {
+function safeEmailVerificationType(value: string) {
+  return emailVerificationTypes.has(value) ? (value as EmailVerificationType) : "email";
+}
+
+function confirmUrl(params: { email?: string; error?: string; message?: string; next?: string; type?: string }) {
   const url = new URL("/auth/confirm", getSiteUrl());
   if (params.email) url.searchParams.set("email", params.email);
   if (params.error) url.searchParams.set("error", params.error);
   if (params.message) url.searchParams.set("message", params.message);
+  url.searchParams.set("type", safeEmailVerificationType(params.type || "email"));
   url.searchParams.set("next", safeNextPath(params.next || "/onboarding"));
   return url;
 }
@@ -37,6 +42,7 @@ export async function GET(request: NextRequest) {
       confirmUrl({
         email,
         next,
+        type,
         error: "Der Bestätigungslink ist unvollständig. Bitte gib den Bestätigungscode aus der Mail ein."
       })
     );
@@ -53,6 +59,7 @@ export async function GET(request: NextRequest) {
       confirmUrl({
         email,
         next,
+        type,
         error: error.message
       })
     );
@@ -61,6 +68,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.redirect(
     confirmUrl({
       next,
+      type,
       message: "E-Mail bestätigt. Du bist jetzt angemeldet."
     })
   );

@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Beer, CalendarDays, Euro, Images, MapPin } from "lucide-react";
+import { Beer, CalendarDays, Clock, Euro, Images, MapPin } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
 import { StatusBadge } from "@/components/status-badge";
-import { bookingPaymentState, bookingPaymentSummary } from "@/lib/booking-summary";
+import { bookingPaymentState, bookingPaymentSummary, bookingPeriod } from "@/lib/booking-summary";
 import {
   getActiveEventForMember,
   getBookingForUser,
@@ -13,7 +13,7 @@ import {
   requireCompleteProfile,
   requireVerifiedUser
 } from "@/lib/data";
-import { formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
+import { formatCurrency, formatDate, formatExpectedArrival, formatParticipantCount } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +52,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             <p>
               {formatDate(event.starts_on)} bis {formatDate(event.ends_on)}
             </p>
+            {booking ? <p className="small-text">Gebucht: {bookingPeriod(booking)}</p> : null}
+          </article>
+          <article className="panel">
+            <Clock />
+            <h2>Ankunft</h2>
+            <p>{booking ? formatExpectedArrival(booking.expected_arrival_at) : "Noch keine Buchung."}</p>
           </article>
           <article className="panel">
             <MapPin />

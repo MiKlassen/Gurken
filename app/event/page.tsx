@@ -44,7 +44,7 @@ function expectedArrivalDate(value: string | null | undefined) {
 
 function expectedArrivalTime(value: string | null | undefined) {
   const time = value?.split("T")[1]?.slice(0, 5);
-  return time ? `${time} Uhr` : "ohne Uhrzeit";
+  return time ? `${time} Uhr` : "Ankunftstag";
 }
 
 function profileName(booking: BookingWithProfile) {
@@ -84,11 +84,11 @@ function buildOccupancyPlan(event: EventRecord, bookings: BookingWithProfile[]):
       .reduce((sum, booking) => sum + bookingParticipantsForDate(booking, date), 0);
     const waitlisted = waitlistedBookings.reduce((sum, booking) => sum + bookingParticipantsForDate(booking, date), 0);
     const arrivals = activeBookings
-      .filter((booking) => bookingTouchesDate(booking, date) && expectedArrivalDate(booking.profiles?.expected_arrival_at) === date)
-      .sort((left, right) => (left.profiles?.expected_arrival_at || "").localeCompare(right.profiles?.expected_arrival_at || ""))
+      .filter((booking) => bookingTouchesDate(booking, date) && expectedArrivalDate(booking.expected_arrival_at) === date)
+      .sort((left, right) => (left.expected_arrival_at || "").localeCompare(right.expected_arrival_at || ""))
       .map((booking) => ({
         name: profileName(booking),
-        time: expectedArrivalTime(booking.profiles?.expected_arrival_at),
+        time: expectedArrivalTime(booking.expected_arrival_at),
         participantCount: booking.participant_count || 1
       }));
 

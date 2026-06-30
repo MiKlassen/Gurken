@@ -39,8 +39,10 @@ Wenn Supabase die angefragte Redirect URL nicht erlaubt, fällt die Mailverifizi
 Für die Supabase-Confirmation-Mail soll der Button direkt auf unsere serverseitige Confirm-Route zeigen und `TokenHash`
 nutzen. `ConfirmationURL` erzeugt je nach Flow einen PKCE-Link, der browser-/storage-abhängig sein kann.
 
+Die vollständigen Vorlagen liegen unter `supabase/email-templates/`. Der Signup-Link nutzt:
+
 ```html
-<a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email&email={{ .Email }}&next=/onboarding">E-Mail bestätigen</a>
+<a href="{{ .SiteURL }}/auth/confirm/complete?token_hash={{ .TokenHash }}&type=email&email={{ .Email }}&next=/onboarding">E-Mail bestätigen</a>
 ```
 
 SMTP-Linktracking sollte für Auth-Mails deaktiviert bleiben, weil Tracking-Wrapper Auth-Queryparameter verändern oder Einmal-Links vorab öffnen können.
@@ -56,8 +58,8 @@ pnpm build
 ## Wichtige Flows
 
 - Registrierung: E-Mail/Passwort plus Turnstile, danach Supabase-Mailverifizierung.
-- Onboarding: Vorname, Name und Wohnort sind Pflicht vor Mitgliederbereich/Buchung/Galerie.
-- Buchung: Übernachtung pro Nacht oder Tagesgasttage für 1 bis 3 Personen, Betrag wird pro Person berechnet und beim Absenden gespeichert.
+- Onboarding: Vorname, Name und vollständige Anschrift sind Pflicht vor Mitgliederbereich/Buchung/Galerie.
+- Buchung: Übernachtung pro Nacht oder Tagesgasttage für 1 bis 3 Personen, ungefähre Ankunftszeit passend zu den gebuchten Tagen, Betrag wird pro Person berechnet und beim Absenden gespeichert.
 - Zahlung: offline per IBAN/PayPal.me; Admin markiert Buchungen manuell als bezahlt.
 - Zahlungsreminder: Vercel Cron ruft täglich `/api/cron/payment-reminders` auf. Ob Reminder aktiv sind und in welchem Intervall Mails erneut rausgehen, entscheidet die Admin-Konfiguration in Supabase. Offene Buchungen (`pending_payment`) bekommen nach dem konfigurierten Intervall erneut eine SMTP-Mail, bis ein Admin sie als bezahlt markiert.
 - Ort: verifizierte Mitglieder sehen Adresse, Ortslink, Hinweise und zwei optionale Zusatzfelder auf `/location`.

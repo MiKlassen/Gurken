@@ -18,6 +18,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "deine Buchung für {{eventSubject}} ist gespeichert.\n\n" +
       "Buchung: {{bookingMode}}\n" +
       "Zeitraum: {{bookingPeriod}}\n" +
+      "Ankunft: {{expectedArrival}}\n" +
       "Personen: {{participantCount}}\n" +
       "Bierkastenpflicht: {{beerCrates}}\n" +
       "Bierkasten-Region: {{beerCrateRegion}}\n" +
@@ -32,6 +33,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "<table>" +
       "<tr><td>Buchung</td><td>{{bookingMode}}</td></tr>" +
       "<tr><td>Zeitraum</td><td>{{bookingPeriod}}</td></tr>" +
+      "<tr><td>Ankunft</td><td>{{expectedArrival}}</td></tr>" +
       "<tr><td>Personen</td><td>{{participantCount}}</td></tr>" +
       "<tr><td>Bierkastenpflicht</td><td>{{beerCrates}}</td></tr>" +
       "<tr><td>Bierkasten-Region</td><td>{{beerCrateRegion}}</td></tr>" +
@@ -53,6 +55,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "du hast für {{eventSubject}} gebucht, aber deine Zahlung ist noch offen.\n\n" +
       "Buchung: {{bookingMode}}\n" +
       "Zeitraum: {{bookingPeriod}}\n" +
+      "Ankunft: {{expectedArrival}}\n" +
       "Personen: {{participantCount}}\n" +
       "Bierkastenpflicht: {{beerCrates}}\n" +
       "Betrag: {{amount}}\n\n" +
@@ -66,6 +69,7 @@ const defaultTemplates: Record<EmailTemplateKey, EmailTemplateRecord> = {
       "<table>" +
       "<tr><td>Buchung</td><td>{{bookingMode}}</td></tr>" +
       "<tr><td>Zeitraum</td><td>{{bookingPeriod}}</td></tr>" +
+      "<tr><td>Ankunft</td><td>{{expectedArrival}}</td></tr>" +
       "<tr><td>Personen</td><td>{{participantCount}}</td></tr>" +
       "<tr><td>Bierkastenpflicht</td><td>{{beerCrates}}</td></tr>" +
       "<tr><td>Betrag</td><td><strong>{{amount}}</strong></td></tr>" +
@@ -86,6 +90,7 @@ export const templatePlaceholderHelp = [
   "eventSubject",
   "bookingMode",
   "bookingPeriod",
+  "expectedArrival",
   "participantCount",
   "beerCrates",
   "beerCrateRegion",

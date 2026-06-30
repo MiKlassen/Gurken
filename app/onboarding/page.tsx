@@ -4,7 +4,7 @@ import { saveProfileAction } from "@/app/actions/profile";
 import { BrandHeader } from "@/components/brand-header";
 import { InstallAppPrompt } from "@/components/install-app-prompt";
 import { SubmitButton } from "@/components/submit-button";
-import { getActiveEventForMember, getCurrentProfile, getIsAdmin, isProfileComplete, requireVerifiedUser } from "@/lib/data";
+import { getCurrentProfile, getIsAdmin, isProfileComplete, requireVerifiedUser } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -12,15 +12,12 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function OnboardingPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireVerifiedUser();
-  const [profile, isAdmin, event, params] = await Promise.all([
+  const [profile, isAdmin, params] = await Promise.all([
     getCurrentProfile(user.id),
     getIsAdmin(user.id, user.email),
-    getActiveEventForMember(),
     searchParams
   ]);
   const error = typeof params.error === "string" ? params.error : "";
-  const minArrival = event ? `${event.starts_on}T00:00` : undefined;
-  const maxArrival = event ? `${event.ends_on}T23:59` : undefined;
 
   return (
     <main className="app-shell">
@@ -81,21 +78,6 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
               />
             </label>
           </div>
-        </fieldset>
-        <fieldset className="address-fieldset">
-          <legend>Anreise</legend>
-          <label>
-            Wann kommst du ungefähr an?
-            <input
-              name="expectedArrivalAt"
-              type="datetime-local"
-              min={minArrival}
-              max={maxArrival}
-              defaultValue={profile?.expected_arrival_at || ""}
-              required
-            />
-          </label>
-          <p className="form-hint">Ungefähr reicht. Du kannst die Angabe später hier ändern.</p>
         </fieldset>
         <SubmitButton>Profil speichern</SubmitButton>
         <p className="legal-note">

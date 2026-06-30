@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Beer, CalendarDays, Euro, MapPin, ReceiptText, Users } from "lucide-react";
+import { Beer, CalendarDays, Clock, Euro, MapPin, ReceiptText, Users } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { beerCrateLabel, bookingModeLabels, bookingPaymentState, bookingPaymentSummary, bookingPeriod, paymentLines } from "@/lib/booking-summary";
-import { formatCurrency, formatDate, formatParticipantCount } from "@/lib/format";
+import { formatCurrency, formatDate, formatExpectedArrival, formatParticipantCount } from "@/lib/format";
 import type { BookingRecord, EventRecord, ProfileRecord } from "@/lib/types";
 
 export function BookingConfirmation({
@@ -36,6 +36,12 @@ export function BookingConfirmation({
           <p className="small-text">
             Treffen: {formatDate(event.starts_on)} bis {formatDate(event.ends_on)}
           </p>
+        </article>
+        <article className="panel">
+          <Clock />
+          <h2>Ankunft</h2>
+          <p>{formatExpectedArrival(booking.expected_arrival_at)}</p>
+          <p className="small-text">Ungefähr reicht. Du kannst die Buchung später ändern.</p>
         </article>
         <article className="panel">
           <Users />

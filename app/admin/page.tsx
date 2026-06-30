@@ -21,7 +21,7 @@ import { getAppSettings, getSecretConfigStatus } from "@/lib/app-settings";
 import { bookingPaymentState } from "@/lib/booking-summary";
 import { demoEvent, getAdminOverview, requireAdmin } from "@/lib/data";
 import { getEmailTemplates, templatePlaceholderHelp } from "@/lib/email-templates";
-import { formatCurrency, formatDate, formatDateTime, formatParticipantCount } from "@/lib/format";
+import { formatCurrency, formatDate, formatDateTime, formatExpectedArrival, formatParticipantCount } from "@/lib/format";
 import type { BookingMode, BookingRecord, BookingStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -69,7 +69,7 @@ function bookingPeriod(booking: BookingRecord) {
 }
 
 function expectedArrival(value: string | null | undefined) {
-  return value ? formatDateTime(value) : "offen";
+  return formatExpectedArrival(value);
 }
 
 export default async function AdminPage({ searchParams }: { searchParams: SearchParams }) {
@@ -147,6 +147,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                 <th>Buchung</th>
                 <th>Personen</th>
                 <th>Zeitraum</th>
+                <th>Ankunft</th>
                 <th>Bierkasten</th>
                 <th>Betrag</th>
                 <th>Bezahlt</th>
@@ -174,6 +175,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                     <td>{bookingModeLabels[booking.mode]}</td>
                     <td>{formatParticipantCount(booking.participant_count)}</td>
                     <td>{bookingPeriod(booking)}</td>
+                    <td>{expectedArrival(booking.expected_arrival_at)}</td>
                     <td>{booking.beer_crate_region || "offen"}</td>
                     <td>{formatCurrency(booking.amount_cents)}</td>
                     <td>{booking.paid_amount_cents ? formatCurrency(booking.paid_amount_cents) : "-"}</td>
@@ -251,7 +253,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                 })
               ) : (
                 <tr>
-                  <td colSpan={12}>Noch keine Buchungen.</td>
+                  <td colSpan={13}>Noch keine Buchungen.</td>
                 </tr>
               )}
             </tbody>
@@ -307,7 +309,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                         ) : null}
                         {profile.postal_code || profile.city ? `${profile.postal_code || ""} ${profile.city || ""}`.trim() : profile.hometown || "offen"}
                       </td>
-                      <td>{expectedArrival(profile.expected_arrival_at)}</td>
+                      <td>{expectedArrival(booking?.expected_arrival_at)}</td>
                       <td>{booking ? bookingModeLabels[booking.mode] : "Keine Buchung"}</td>
                       <td>{booking ? formatParticipantCount(booking.participant_count) : "-"}</td>
                       <td>{booking ? <StatusBadge status={booking.status} /> : "-"}</td>

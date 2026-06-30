@@ -1,0 +1,39 @@
+<div style="margin:0;padding:0;background:#f8fbf2;font-family:Arial,Helvetica,sans-serif;color:#172311;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fbf2;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background:#ffffff;border:1px solid #d8e4c9;border-radius:10px;overflow:hidden;box-shadow:0 18px 45px rgba(46,74,18,0.08);">
+          <tr>
+            <td style="padding:30px 32px;background:#e8f4d4;border-bottom:1px solid #d8e4c9;">
+              <div style="font-size:13px;line-height:1.4;font-weight:700;color:#587d1f;text-transform:uppercase;letter-spacing:.04em;">Gurken Treffen</div>
+              <h1 style="margin:10px 0 0;font-size:30px;line-height:1.15;color:#2e4a12;">Login bestätigen</h1>
+              <p style="margin:12px 0 0;font-size:15px;line-height:1.55;color:#4f6046;">Nutze den Link oder den Code, um dich im Mitgliederbereich anzumelden.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Hallo {{ .Email }},</p>
+              <p style="margin:0 0 22px;font-size:16px;line-height:1.6;">du hast einen Login-Link oder Einmalcode für das Gurken Treffen angefordert.</p>
+              <p style="margin:28px 0;">
+                <a href="{{ .SiteURL }}/auth/confirm/complete?token_hash={{ .TokenHash }}&type=magiclink&email={{ .Email }}&next=/dashboard" style="display:inline-block;background:#587d1f;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;line-height:1;padding:15px 22px;border-radius:8px;">Einloggen</a>
+              </p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0;border:1px solid #d8e4c9;border-radius:8px;background:#fbfff5;">
+                <tr>
+                  <td style="padding:18px 20px;">
+                    <div style="font-size:13px;font-weight:700;color:#2e4a12;text-transform:uppercase;letter-spacing:.03em;">Einmalcode</div>
+                    <div style="margin-top:8px;font-size:24px;line-height:1.2;font-weight:700;color:#172311;letter-spacing:.08em;">{{ .Token }}</div>
+                    <p style="margin:10px 0 0;font-size:13px;line-height:1.5;color:#66735f;">Der Code ist nur kurz gültig und nur für diese E-Mail-Adresse gedacht.</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:24px 0 0;font-size:13px;line-height:1.55;color:#66735f;">Direkter Link:<br><a href="{{ .SiteURL }}/auth/confirm/complete?token_hash={{ .TokenHash }}&type=magiclink&email={{ .Email }}&next=/dashboard" style="color:#587d1f;text-decoration:underline;word-break:break-all;">{{ .SiteURL }}/auth/confirm/complete?token_hash={{ .TokenHash }}&type=magiclink&email={{ .Email }}&next=/dashboard</a></p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px;background:#fbfff5;border-top:1px solid #d8e4c9;color:#66735f;font-size:12px;line-height:1.5;">Wenn du keinen Login angefordert hast, kannst du diese Mail ignorieren.</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</div>

@@ -10,6 +10,7 @@ const PROFILE_POSTAL_CODE_CONTEXT = "profiles.postal_code";
 const PROFILE_CITY_CONTEXT = "profiles.city";
 const PROFILE_EXPECTED_ARRIVAL_CONTEXT = "profiles.expected_arrival_at";
 const BOOKING_BEER_REGION_CONTEXT = "bookings.beer_crate_region";
+const BOOKING_EXPECTED_ARRIVAL_CONTEXT = "bookings.expected_arrival_at";
 const GALLERY_CAPTION_CONTEXT = "gallery_photos.caption";
 
 function base64Url(buffer: Buffer) {
@@ -83,21 +84,27 @@ function decryptText(value: string | null | undefined, context: string) {
   return Buffer.concat([decipher.update(fromBase64Url(ciphertextValue)), decipher.final()]).toString("utf8");
 }
 
-type ProfilePersonalFields = Pick<
-  ProfileRecord,
-  "first_name" | "last_name" | "hometown" | "street_address" | "postal_code" | "city" | "expected_arrival_at"
->;
+type ProfilePersonalFields = Pick<ProfileRecord, "first_name" | "last_name" | "hometown" | "street_address" | "postal_code" | "city"> &
+  Partial<Pick<ProfileRecord, "expected_arrival_at">>;
 
 export function encryptProfileFields(input: ProfilePersonalFields) {
-  return {
+  const encrypted = {
     first_name: encryptText(input.first_name, PROFILE_FIRST_NAME_CONTEXT),
     last_name: encryptText(input.last_name, PROFILE_LAST_NAME_CONTEXT),
     hometown: encryptText(input.hometown, PROFILE_HOMETOWN_CONTEXT),
     street_address: encryptText(input.street_address, PROFILE_STREET_ADDRESS_CONTEXT),
     postal_code: encryptText(input.postal_code, PROFILE_POSTAL_CODE_CONTEXT),
-    city: encryptText(input.city, PROFILE_CITY_CONTEXT),
-    expected_arrival_at: encryptText(input.expected_arrival_at, PROFILE_EXPECTED_ARRIVAL_CONTEXT)
+    city: encryptText(input.city, PROFILE_CITY_CONTEXT)
   };
+
+  if ("expected_arrival_at" in input) {
+    return {
+      ...encrypted,
+      expected_arrival_at: encryptText(input.expected_arrival_at, PROFILE_EXPECTED_ARRIVAL_CONTEXT)
+    };
+  }
+
+  return encrypted;
 }
 
 export function decryptProfileFields<T extends ProfilePersonalFields | null>(profile: T): T {
@@ -119,10 +126,15 @@ export function encryptBeerCrateRegion(value: string | null | undefined) {
   return encryptText(value, BOOKING_BEER_REGION_CONTEXT);
 }
 
+export function encryptBookingExpectedArrival(value: string | null | undefined) {
+  return encryptText(value, BOOKING_EXPECTED_ARRIVAL_CONTEXT);
+}
+
 export function decryptBookingFields<T extends BookingRecord | BookingWithProfile>(booking: T): T {
   return {
     ...booking,
     beer_crate_region: decryptText(booking.beer_crate_region, BOOKING_BEER_REGION_CONTEXT),
+    expected_arrival_at: decryptText(booking.expected_arrival_at, BOOKING_EXPECTED_ARRIVAL_CONTEXT),
     ...("profiles" in booking ? { profiles: decryptProfileFields(booking.profiles) } : {})
   };
 }

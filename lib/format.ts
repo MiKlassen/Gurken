@@ -14,9 +14,32 @@ export function formatDate(date: string | null | undefined) {
   }).format(new Date(`${date}T12:00:00`));
 }
 
+export function formatWeekdayDate(date: string | null | undefined) {
+  if (!date) return "offen";
+  return new Intl.DateTimeFormat("de-DE", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(new Date(`${date}T12:00:00`));
+}
+
 export function formatDateTime(date: string | null | undefined) {
   if (!date) return "offen";
   return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(date));
+}
+
+export function formatExpectedArrival(date: string | null | undefined) {
+  if (!date) return "offen";
+  if (!date.includes("T")) return formatWeekdayDate(date);
+  return new Intl.DateTimeFormat("de-DE", {
+    weekday: "long",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
