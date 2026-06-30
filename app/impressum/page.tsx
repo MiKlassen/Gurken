@@ -2,16 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
+import { getHeaderAuthState } from "@/lib/header-auth";
 
 export const metadata: Metadata = {
   title: "Impressum | Gurken Treffen",
   description: "Impressum für das interne Gurken Treffen."
 };
 
-export default function ImpressumPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ImpressumPage() {
+  const headerAuth = await getHeaderAuthState();
+  const backHref = headerAuth.isAuthed ? "/dashboard" : "/";
+
   return (
     <main className="app-shell">
-      <BrandHeader />
+      <BrandHeader isAuthed={headerAuth.isAuthed} isAdmin={headerAuth.isAdmin} />
       <section className="page-heading">
         <FileText size={34} />
         <div>
@@ -48,7 +54,7 @@ export default function ImpressumPage() {
         </section>
 
         <p className="legal-backlink">
-          <Link href="/">Zurück zur Startseite</Link>
+          <Link href={backHref}>{headerAuth.isAuthed ? "Zurück zum Mitgliederbereich" : "Zurück zur Startseite"}</Link>
         </p>
       </article>
     </main>

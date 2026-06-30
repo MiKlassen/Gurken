@@ -36,10 +36,11 @@ Für Production müssen Supabase und Vercel dieselbe kanonische Domain verwenden
 
 Wenn Supabase die angefragte Redirect URL nicht erlaubt, fällt die Mailverifizierung auf die Supabase Site URL zurück. Dann landen Mails schnell auf einer Vercel-Preview- oder Projekt-URL statt auf `gurken.family`.
 
-Für die Supabase-Confirmation-Mail kann der Button entweder `{{ .ConfirmationURL }}` nutzen oder direkt auf unsere Callback-Route zeigen:
+Für die Supabase-Confirmation-Mail soll der Button direkt auf unsere serverseitige Confirm-Route zeigen und `TokenHash`
+nutzen. `ConfirmationURL` erzeugt je nach Flow einen PKCE-Link, der browser-/storage-abhängig sein kann.
 
 ```html
-<a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=signup&next=/onboarding">E-Mail bestätigen</a>
+<a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=signup&email={{ .Email }}&next=/onboarding">E-Mail bestätigen</a>
 ```
 
 SMTP-Linktracking sollte für Auth-Mails deaktiviert bleiben, weil Tracking-Wrapper Auth-Queryparameter verändern oder Einmal-Links vorab öffnen können.

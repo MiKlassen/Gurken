@@ -2,16 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { BrandHeader } from "@/components/brand-header";
+import { getHeaderAuthState } from "@/lib/header-auth";
 
 export const metadata: Metadata = {
   title: "Datenschutz | Gurken Treffen",
   description: "Datenschutzhinweise für das interne Gurken Treffen."
 };
 
-export default function DatenschutzPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DatenschutzPage() {
+  const headerAuth = await getHeaderAuthState();
+  const backHref = headerAuth.isAuthed ? "/dashboard" : "/";
+
   return (
     <main className="app-shell">
-      <BrandHeader />
+      <BrandHeader isAuthed={headerAuth.isAuthed} isAdmin={headerAuth.isAdmin} />
       <section className="page-heading">
         <ShieldCheck size={34} />
         <div>
@@ -185,7 +191,7 @@ export default function DatenschutzPage() {
         </section>
 
         <p className="legal-backlink">
-          <Link href="/">Zurück zur Startseite</Link>
+          <Link href={backHref}>{headerAuth.isAuthed ? "Zurück zum Mitgliederbereich" : "Zurück zur Startseite"}</Link>
         </p>
       </article>
     </main>

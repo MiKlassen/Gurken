@@ -1,9 +1,25 @@
 "use server";
 
+import type { Route } from "next";
 import { redirect } from "next/navigation";
 import { getSiteUrl } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { verifyTurnstile } from "@/lib/turnstile";
+
+function safeNextPath(value: string, fallback = "/onboarding") {
+  if (!value) return fallback;
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+  return fallback;
+}
+
+function confirmPagePath(params: { email?: string; error?: string; message?: string; next?: string }) {
+  const search = new URLSearchParams();
+  if (params.email) search.set("email", params.email);
+  if (params.error) search.set("error", params.error);
+  if (params.message) search.set("message", params.message);
+  search.set("next", safeNextPath(params.next || "/onboarding"));
+  return `/auth/confirm?${search.toString()}` as Route;
+}
 
 function requireString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -28,12 +44,32 @@ export async function signUpAction(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/onboarding`
+      emailRedirectTo: `${getSiteUrl()}/auth/confirm/complete`
     }
   });
 
   if (error) redirect(`/auth/register?error=${encodeURIComponent(error.message)}`);
   redirect(`/auth/verify?email=${encodeURIComponent(email)}`);
+}
+
+export async function confirmEmailCodeAction(formData: FormData) {
+  const email = requireString(formData, "email").toLowerCase();
+  const token = requireString(formData, "token").replace(/\s/g, "");
+  const next = safeNextPath(requireString(formData, "next"));
+
+  if (!email || !token) {
+    redirect(confirmPagePath({ email, next, error: "Bitte E-Mail und Bestätigungscode angeben." }));
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "signup"
+  });
+
+  if (error) redirect(confirmPagePath({ email, next, error: error.message }));
+  redirect(confirmPagePath({ next, message: "E-Mail bestätigt. Du bist jetzt angemeldet." }));
 }
 
 export async function signInAction(formData: FormData) {
